@@ -7,10 +7,11 @@
 #define NULL 0L
 #define nullptr 0L
 
+typedef int bool;
 #define true 1
 #define false 0
 
-typedef int bool;
+#define STACK_REG_OFFSET 12
 
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))

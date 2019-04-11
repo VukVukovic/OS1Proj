@@ -2,22 +2,35 @@
 
 #include "Util.h"
 
+volatile PCB* PCB::running = nullptr;
+ID PCB::ID0 = 0;
+
 PCB::PCB() {
-	sp = ss = bp = zavrsio =  0;
-	kvant=10;
+	sp = ss = bp = 0;
+	finished = false;
+	kvant=1;
 	stack = nullptr;
+	id = ++ID0;
 }
 
-PCB::PCB(StackSize stackSize, Time timeSlice, void (*body)()) {
-	unsigned* st1 = new unsigned[1024];
+PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread) {
+	this->myThread = myThread;
 
-	st1[1023] =0x200;//setovan I fleg u
-	                      // pocetnom PSW-u za nit
-	st1[1022] = FP_SEG(body);
-	st1[1021] = FP_OFF(body);
+	stack = new unsigned[stackSize];
+	stack[stackSize-1] = 0x200;
+	stack[stackSize-2] = FP_SEG(PCB::runner);
+	stack[stackSize-3] = FP_OFF(PCB::runner);
 
-	sp = FP_OFF(st1+1012);
-	ss = FP_SEG(st1+1012);
-	zavrsio = 0;
+	sp = FP_OFF(stack+stackSize-STACK_REG_OFFSET);
+	ss = FP_SEG(stack+stackSize-STACK_REG_OFFSET);
+	bp = sp;
+	finished = false;
 	kvant = timeSlice;
+	id = ++ID0;
+}
+
+void PCB::runner() {
+	PCB::running->myThread->run();
+	running->finished = true;
+	dispatch();
 }

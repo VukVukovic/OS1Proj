@@ -1,10 +1,9 @@
-//pretpostavljeni memorijski model: huge
-
 #include <iostream.h>
 #include <stdio.h>
 #include "PCB.h"
 #include "Util.h"
 #include "SCHEDULE.H"
+#include "Thread.h"
 
 // Zabranjuje prekide
 #define lock asm cli
@@ -12,14 +11,41 @@
 // Dozvoljava prekide
 #define unlock asm sti
 
-PCB *p[3];
-volatile PCB* running; 
+class Nit1 : public Thread {
+public:
+	Nit1(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
+protected:
+	void run() {
+		for (int i =0; i < 30; ++i) {
+			// lock
+				cout<<"u a() i = "<<i<<endl;
+			//	unlock
+				for (int k = 0; k<10000; ++k)
+					for (int j = 0; j <30000; ++j);
+			}
+	}
+};
+
+class Nit2 : public Thread {
+public:
+	Nit2(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
+protected:
+	void run() {
+		for (int i =0; i < 30; ++i) {
+				//lock
+				cout<<"u b() i = "<<i<<endl;
+				//unlock
+				for (int k = 0; k<10000; ++k)
+					for (int j = 0; j <30000; ++j);
+			}
+	}
+};
 
 unsigned tsp;
 unsigned tss;
 unsigned tbp;
 
-volatile int brojac = 20;
+volatile int brojac = 1;
 volatile bool zahtevana_promena_konteksta = 0;
 
 void interrupt timer(){	// prekidna rutina
@@ -32,19 +58,23 @@ void interrupt timer(){	// prekidna rutina
 			mov tbp, bp
 		}
 
-		running->sp = tsp;
-		running->ss = tss;
-		running->bp = tbp;
+		PCB::running->sp = tsp;
+		PCB::running->ss = tss;
+		PCB::running->bp = tbp;
 
-		if (!running->zavrsio)
-			Scheduler::put((PCB*) running);
-		running = Scheduler::get();
-  
-		tsp = running->sp;
-		tss = running->ss; 
-		tbp = running->bp;
+		if (!PCB::running->finished)
+			Scheduler::put((PCB*) PCB::running);
+		PCB::running = Scheduler::get();
 
-		brojac = running->kvant;
+
+		//printf("Prelazim na nit ID=%d\n", PCB::running->id);
+		//asm cli;
+
+		tsp = PCB::running->sp;
+		tss = PCB::running->ss;
+		tbp = PCB::running->bp;
+
+		brojac = PCB::running->kvant;
 
 		asm {
 			mov sp, tsp   // restore sp
@@ -71,46 +101,13 @@ void dispatch(){ // sinhrona promena konteksta
 	asm sti;
 }
 
-void exitThread(){
-	running->zavrsio = 1;
-	dispatch();
-}  
-
-void a(){
-	for (int i =0; i < 30; ++i) {
-		lock
-		cout<<"u a() i = "<<i<<endl;
-		unlock
-		for (int k = 0; k<10000; ++k)
-			for (int j = 0; j <30000; ++j);
-	}
-	exitThread();
-}
-
-void b(){
-	for (int i =0; i < 30; ++i) {
-		lock
-		cout<<"u b() i = "<<i<<endl;
-		unlock
-		for (int k = 0; k<10000; ++k)
-			for (int j = 0; j <30000; ++j);
-	}
-	exitThread();
-}
-
 void doSomething(){
 	lock
-
-	p[1] = new PCB(1024,40,a);
-	cout<<"napravio a"<<endl;
-	p[2] = new PCB(1024,20,b);
-	cout<<"napravio b"<<endl;
-	p[0] = new PCB();
-
-	Scheduler::put(p[1]);
-	Scheduler::put(p[2]);
-
-	running = p[0];
+	PCB::running = new PCB();
+	Thread *t1 = new Nit1(1024, 1);
+	Thread *t2 = new Nit2(1024, 1);
+	t1->start();
+	t2->start();
 	unlock
 
 	for (int i = 0; i < 30; ++i) {
