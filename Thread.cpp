@@ -1,6 +1,7 @@
 #include "Thread.h"
 #include "PCB.h"
 #include "SCHEDULE.H"
+#include "Locker.h"
 
 Thread::Thread (StackSize stackSize, Time timeSlice) {
 	myPCB = new PCB(stackSize, timeSlice, this);
@@ -8,9 +9,13 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 Thread::~Thread() {}
 
 void Thread::start() {
-	//lock
+	Locker::lock();
 	Scheduler::put(myPCB);
-	//unlock
+	Locker::unlock();
 }
 void Thread::waitToComplete() {}
-void Thread::sleep(Time timeToSleep) {}
+void Thread::sleep(Time timeToSleep) {
+	Locker::lock();
+	PCB::sleep(timeToSleep);
+	Locker::unlock();
+}

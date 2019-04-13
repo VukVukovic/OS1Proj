@@ -4,6 +4,8 @@
 #include "Util.h"
 #include "SCHEDULE.H"
 #include "Thread.h"
+#include "List.h"
+#include "SlpList.h"
 
 // Zabranjuje prekide
 #define lock asm cli
@@ -16,6 +18,9 @@ public:
 	Nit1(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
 protected:
 	void run() {
+		printf("A went to sleep!");
+		sleep(100);
+		printf("A woken up!");
 		for (int i =0; i < 30; ++i) {
 			// lock
 				cout<<"u a() i = "<<i<<endl;
@@ -49,7 +54,10 @@ volatile int brojac = 1;
 volatile bool zahtevana_promena_konteksta = 0;
 
 void interrupt timer(){	// prekidna rutina
-	if (!zahtevana_promena_konteksta) brojac--; 
+	if (!zahtevana_promena_konteksta) {
+		brojac--;
+		PCB::decSleepingWake();
+	}
 	if (brojac == 0 || zahtevana_promena_konteksta) {
 		asm {
 			// cuva sp
@@ -62,10 +70,10 @@ void interrupt timer(){	// prekidna rutina
 		PCB::running->ss = tss;
 		PCB::running->bp = tbp;
 
-		if (!PCB::running->finished)
+		if (!PCB::running->finished && !PCB::running->sleeping)
 			Scheduler::put((PCB*) PCB::running);
-		PCB::running = Scheduler::get();
 
+		PCB::running = Scheduler::get();
 
 		//printf("Prelazim na nit ID=%d\n", PCB::running->id);
 		//asm cli;
@@ -109,6 +117,25 @@ void doSomething(){
 	t1->start();
 	t2->start();
 	unlock
+
+	lock
+	printf("Put to sleep!");
+	unlock
+	Thread::sleep(50);
+	lock
+	printf("Woken up!");
+	unlock
+
+	List<int> lst;
+	lst.append(5);
+	lst.append(6);
+	lst.add(7);
+	lst.add(8);
+	lst.append(9);
+
+	for (lst.begin();lst.exists();lst.next()) {
+		printf("%d ", lst.get());
+	}
 
 	for (int i = 0; i < 30; ++i) {
   	lock
