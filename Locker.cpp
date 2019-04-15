@@ -1,11 +1,14 @@
 #include "Locker.h"
+#include "PCB.h"
 
-bool Locker::lockFlag = false;
+volatile int Locker::lockFlag = 0;
 
 void Locker::lock() {
-	lockFlag = true;
+	lockFlag++;
 }
 
 void Locker::unlock() {
-	lockFlag = false;
+	lockFlag--;
+	if (lockFlag==0 && PCB::explicitDispatch)
+		dispatch();
 }

@@ -14,8 +14,17 @@ void Thread::start() {
 	Locker::unlock();
 }
 void Thread::waitToComplete() {}
+
+/*
 void Thread::sleep(Time timeToSleep) {
 	Locker::lock();
 	PCB::sleep(timeToSleep);
+	Locker::unlock();
+} */
+
+void dispatch(){
+	Locker::lock();
+	PCB::explicitDispatch = true;
+	timer();
 	Locker::unlock();
 }

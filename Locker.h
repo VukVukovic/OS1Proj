@@ -5,9 +5,10 @@
 
 class Locker {
 public:
-	static bool lockFlag;
+	volatile static int lockFlag;
 	static void lock();
 	static void unlock();
+	static bool locked() { return lockFlag>0; }
 private:
 	Locker() {}
 };
