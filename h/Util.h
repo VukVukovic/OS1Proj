@@ -13,6 +13,7 @@ typedef int bool;
 
 #define STACK_REG_OFFSET 12
 
+typedef void interrupt (*pInterrupt) (...);
 void inicTimerInterrupt();
 void restoreTimerInterrupt();
 #endif

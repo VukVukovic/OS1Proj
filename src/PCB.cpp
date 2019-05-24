@@ -62,7 +62,7 @@ unsigned tsp;
 unsigned tss;
 unsigned tbp;
 
-void interrupt timer(){
+void interrupt timer(...){
 	if(!PCB::explicitDispatch) asm int 60h;
 
 	if (!PCB::explicitDispatch && PCB::quantCounter>0)
