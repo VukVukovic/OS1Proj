@@ -1,8 +1,5 @@
-#ifndef UTIL_H_
-#define UTIL_H_
-
-#define FP_SEG( fp )( (unsigned )( void _seg * )( void far * )( fp ))
-#define FP_OFF( fp )( (unsigned )( fp ))
+#ifndef UTIL_H
+#define UTIL_H
 
 #define NULL 0L
 #define nullptr 0L
@@ -12,8 +9,4 @@ typedef int bool;
 #define false 0
 
 #define STACK_REG_OFFSET 12
-
-typedef void interrupt (*pInterrupt) (...);
-void inicTimerInterrupt();
-void restoreTimerInterrupt();
 #endif

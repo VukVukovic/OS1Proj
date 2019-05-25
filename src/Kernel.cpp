@@ -4,6 +4,8 @@
 #include "Thread.h"
 #include "Locker.h"
 #include "PCB.h"
+#include "Timer.h"
+#include "List.h"
 
 class Nit1 : public Thread {
 public:
@@ -39,7 +41,6 @@ void Nit2::run() {
 	}
 }
 void doSomething(){
-	PCB::running = new PCB();
 	Thread *t1 = new Nit1(1024, 1);
 	Thread *t2 = new Nit2(1024, 1);
 	t1->start();
@@ -52,7 +53,7 @@ void doSomething(){
 		Locker::unlock();
 
 		for (int j = 0; j< 30000; ++j)
-				for (int k = 0; k < 30000; ++k);
+			for (int k = 0; k < 30000; ++k);
 	}
 
 	Locker::lock();
@@ -62,7 +63,8 @@ void doSomething(){
 
 int main(){
 	inicTimerInterrupt();
-	
+	PCB::running = new PCB(0,3,nullptr);
+	PCB::quantCounter = 3;
 	doSomething();
 
 	restoreTimerInterrupt();

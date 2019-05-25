@@ -5,6 +5,7 @@
 
 template<class T>
 class List {
+protected:
 	struct Node{
 		T data;
 		Node* next;
@@ -14,6 +15,7 @@ class List {
 
 	Node *first, *last, *curr;
 	int len;
+	
 public:
 	List() : first(nullptr), last(nullptr), curr(nullptr), len(0) {}
 	void add(T data) {

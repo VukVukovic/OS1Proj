@@ -3,32 +3,30 @@
 #include "Util.h"
 #include "Thread.h"
 
-class SleepList;
+enum State{READY, RUNNING, BLOCKED, FINISHED};
 
 class PCB {
 public:
 	volatile static PCB* running;
-	volatile static int quantCounter;
+	volatile static Time quantCounter;
 	volatile static bool explicitDispatch;
-	//static SleepList sleepList;
+
 	unsigned *stack;
 	unsigned sp;
 	unsigned ss;
 	unsigned bp;
-	bool finished;
-	//bool sleeping;
-	int timeSlice;
-	Thread *myThread;
-	ID id;
 
-	PCB();
+	State state;
+
+	Time timeSlice;
+	Thread *myThread;
+	
+	ID getID() { return id; }
+ 	PCB();
 	PCB(StackSize stackSize, Time timeSlice, Thread *myThread);
 	static void runner();
-	//static void sleep(Time timeToSleep);
-	//static void decSleepingWake();
 private:
 	static ID ID0;
+	ID id;
 };
-
-void interrupt timer();
 #endif
