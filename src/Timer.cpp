@@ -27,7 +27,7 @@ void interrupt timer(...){
 		PCB::quantCounter--;
 
 	if (PCB::explicitDispatch || PCB::quantCounter == 0) {
-        if (!Locker::locked()) {
+        if (!locked) {
             PCB::explicitDispatch = false;
             asm {
                 mov tsp, sp

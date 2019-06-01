@@ -16,9 +16,9 @@ protected:
 
 void Nit1::run() {
 		for (int i =0; i < 30; ++i) {
-			Locker::lock();
+			lock;
 			cout<<"u a() i = "<<i<<endl;
-			Locker::unlock();
+			unlock;
 			for (int k = 0; k<10000; ++k)
 				for (int j = 0; j <30000; ++j);
 		}
@@ -33,9 +33,9 @@ protected:
 
 void Nit2::run() {
 	for (int i =0; i < 30; ++i) {
-		Locker::lock();
+		lock;
 		cout<<"u b() i = "<<i<<endl;
-		Locker::unlock();
+		unlock;
 		for (int k = 0; k<10000; ++k)
 			for (int j = 0; j <30000; ++j);
 	}
@@ -47,23 +47,23 @@ void doSomething(){
 	t2->start();
 
 	for (int i = 0; i < 30; ++i) {
-		bool k = Locker::locked();
-		Locker::lock();
+		bool k = locked;
+		lock;
 		cout<<"main "<<i<<" "<<k<<endl;
-		Locker::unlock();
+		unlock;
 
 		for (int j = 0; j< 30000; ++j)
 			for (int k = 0; k < 30000; ++k);
 	}
 
-	Locker::lock();
+	lock;
 	cout<<"Happy End"<<endl;
-	Locker::unlock();
+	unlock;
 }
 
 int main(){
 	inicTimerInterrupt();
-	PCB::running = new PCB(0,3,nullptr);
+	PCB::running = new PCB(0,10,nullptr);
 	PCB::quantCounter = 3;
 	doSomething();
 

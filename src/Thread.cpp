@@ -11,10 +11,10 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 Thread::~Thread() {}
 
 void Thread::start() {
-	Locker::lock();
+	lock;
 	myPCB->state = READY;
 	Scheduler::put(myPCB);
-	Locker::unlock();
+	unlock;
 }
 void Thread::waitToComplete() {}
 
@@ -23,12 +23,12 @@ ID Thread::getId() {
 }
 
 ID Thread::getRunningId() {
-	return PCB::running->getID();
+	return ((PCB*)PCB::running)->getID();
 }
 
-void dispatch(){
-	asm cli; // CHECK THIS
+void dispatch() {
+	enableInterrupts;
 	PCB::explicitDispatch = true;
 	timer();
-	asm sti;
+	disableInterrupts;
 }
