@@ -2,25 +2,13 @@
 #define LOCKER_H
 
 #include "Util.h"
+#include "PCB.h"
 
-#define disableInterrupts asm cli
-#define enableInterrupts asm sti
-#define lock Locker::_lock()
-#define unlock Locker::_unlock()
-#define locked Locker::_locked()
+#define disableInterrupts asm { pushf; cli; }
+#define enableInterrupts asm popf
 
-class Locker {
-public:
-	volatile static int lockCnt;
-	static void _lock();
-	static void _unlock();
-	static bool _locked() { return lockCnt>0; }
-
-	//volatile static int flags;
-	//volatile static bool disabled;
-	//static void disableInterrupts();
-	//static void enableInterrupts();
-private:
-	Locker() {}
-};
+extern volatile int lockCnt;
+#define lock ++lockCnt
+#define unlock if (--lockCnt == 0 && PCB::explicitDispatch) { dispatch(); }
+#define locked (lockCnt>0)
 #endif

@@ -47,7 +47,7 @@ void doSomething(){
 	t2->start();
 
 	for (int i = 0; i < 30; ++i) {
-		bool k = locked;
+		int k = lockCnt;
 		lock;
 		cout<<"main "<<i<<" "<<k<<endl;
 		unlock;

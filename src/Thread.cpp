@@ -8,7 +8,9 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 	myPCB = new PCB(stackSize, timeSlice, this);
 }
 
-Thread::~Thread() {}
+Thread::~Thread() {
+	waitToComplete();
+}
 
 void Thread::start() {
 	lock;
@@ -27,8 +29,8 @@ ID Thread::getRunningId() {
 }
 
 void dispatch() {
-	enableInterrupts;
+	disableInterrupts;
 	PCB::explicitDispatch = true;
 	timer();
-	disableInterrupts;
+	enableInterrupts;
 }
