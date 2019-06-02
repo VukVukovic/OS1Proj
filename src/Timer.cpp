@@ -3,6 +3,7 @@
 #include "Locker.h"
 #include "SCHEDULE.H"
 #include <dos.h>
+#include <iostream.h>
 
 pInterrupt oldTimerRoutine;
 
@@ -12,7 +13,9 @@ void inicTimerInterrupt() {
 }
 
 void restoreTimerInterrupt() {
+    lock;
 	setvect(8, oldTimerRoutine);
+    unlock;
 }
 
 unsigned tsp;

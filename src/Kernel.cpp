@@ -10,12 +10,15 @@
 class Nit1 : public Thread {
 public:
 	Nit1(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
+	~Nit1() {
+		waitToComplete();
+	}
 protected:
 	void run();
 };
 
 void Nit1::run() {
-		for (int i =0; i < 30; ++i) {
+		for (int i = 0; i < 30; ++i) {
 			lock;
 			cout<<"u a() i = "<<i<<endl;
 			unlock;
@@ -27,12 +30,13 @@ void Nit1::run() {
 class Nit2 : public Thread {
 public:
 	Nit2(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
+	
 protected:
 	void run();
 };
 
 void Nit2::run() {
-	for (int i =0; i < 30; ++i) {
+	for (int i = 0; i < 30; ++i) {
 		lock;
 		cout<<"u b() i = "<<i<<endl;
 		unlock;
@@ -41,8 +45,8 @@ void Nit2::run() {
 	}
 }
 void doSomething(){
-	Thread *t1 = new Nit1(1024, 1);
-	Thread *t2 = new Nit2(1024, 1);
+	Nit1 *t1 = new Nit1(1024, 1);
+	Nit2 *t2 = new Nit2(1024, 1);
 	t1->start();
 	t2->start();
 
@@ -56,9 +60,15 @@ void doSomething(){
 			for (int k = 0; k < 30000; ++k);
 	}
 
+	t1->waitToComplete();
+	t2->waitToComplete();
+
 	lock;
 	cout<<"Happy End"<<endl;
 	unlock;
+
+	delete t1;
+	delete t2;
 }
 
 int main(){

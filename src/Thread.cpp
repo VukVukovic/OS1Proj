@@ -10,22 +10,28 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 
 Thread::~Thread() {
 	waitToComplete();
+	delete myPCB;
+	myPCB = nullptr;
 }
 
 void Thread::start() {
-	lock;
-	myPCB->state = READY;
-	Scheduler::put(myPCB);
-	unlock;
+	myPCB->start();
 }
-void Thread::waitToComplete() {}
+
+void Thread::waitToComplete() {
+	myPCB->waitToComplete();
+}
 
 ID Thread::getId() {
 	return myPCB->getID();
 }
 
 ID Thread::getRunningId() {
-	return ((PCB*)PCB::running)->getID();
+	return PCB::getRunningId();
+}
+
+Thread* Thread::getThreadById(ID id) {
+	return PCB::getThreadById(id);
 }
 
 void dispatch() {

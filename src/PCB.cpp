@@ -9,6 +9,7 @@
 volatile PCB* PCB::running = nullptr;
 volatile Time PCB::quantCounter=2;
 volatile bool PCB::explicitDispatch=false;
+volatile List<PCB*> PCB::PCBList;
 
 ID PCB::ID0 = 0;
 
@@ -34,11 +35,66 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread) {
 	if (timeSlice == 0) timeSlice=-1; // Threads with unlimited timeSlice
 	this->timeSlice = timeSlice;
 
+	lock;
 	id = ++ID0;
+	PCBList.pushBack(this);
+	unlock;
+}
+
+void PCB::start() {
+	lock;
+	state = READY;
+	Scheduler::put(this);
+	unlock;
 }
 
 void PCB::runner() {
 	running->myThread->run();
 	running->state = FINISHED;
+	running->wakeUpWaiting();
 	dispatch();
+}
+
+void PCB::wakeUpWaiting() {
+	lock;
+	for (List<PCB*>::Iterator it = waiting.begin(); it.exists(); ++it) {
+		PCB *wakingup = *it;
+		wakingup->state = READY;
+		Scheduler::put(wakingup);
+		it.remove();
+	}
+	unlock;
+}
+
+Thread* PCB::getThreadById(ID id) {
+	Thread *ret = nullptr;
+
+	lock;
+	for (List<PCB*>::Iterator it = PCBList.begin(); it.exists(); ++it)
+		if ((*it)->getID() == id) { ret = (*it)->myThread; break; }
+	unlock;
+
+	return ret;
+}
+
+ID PCB::getRunningId() {
+	return running->getID();
+}
+
+void PCB::waitToComplete() {
+	if (state == FINISHED) return;
+	if (PCB::running == this) return;
+
+	// add support for idle/kernel thread
+	lock;
+	PCB::running->state = BLOCKED;
+	waiting.pushBack((PCB*)PCB::running);
+	unlock;
+	dispatch();
+}
+
+PCB::~PCB() {
+	lock;
+	delete[] stack;
+	unlock;
 }

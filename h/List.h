@@ -41,15 +41,8 @@ public:
 			Elem *next = current->next;
 			deleted_next = next;
 
-			if (prev != nullptr)
-				prev->next = next;
-			else
-				list->first = next;
-
-			if (next != nullptr)
-				next->prev = prev;
-			else
-				list->last = prev;
+			(prev!=nullptr)?prev->next:list->first = next;
+			(next!=nullptr)?next->prev:list->last = prev;
 
 			delete current;
 			current = nullptr;
