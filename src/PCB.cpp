@@ -5,6 +5,7 @@
 #include "Locker.h"
 #include <dos.h>
 #include <iostream.h>
+#include <stdio.h>
 
 volatile PCB* PCB::running = nullptr;
 volatile Time PCB::quantCounter=2;
@@ -94,7 +95,9 @@ void PCB::waitToComplete() {
 }
 
 PCB::~PCB() {
-	lock;
-	delete[] stack;
-	unlock;
+	//lock;
+	//printf("Deleting PCB of %d\n",id);
+	//if (stack!=nullptr)
+	//	delete[] stack;
+	//unlock;
 }

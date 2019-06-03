@@ -1,83 +1,22 @@
 #include <iostream.h>
-#include <stdlib.h>
 #include "Util.h"
-#include "Thread.h"
-#include "Locker.h"
 #include "PCB.h"
 #include "Timer.h"
-#include "List.h"
 
-class Nit1 : public Thread {
-public:
-	Nit1(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
-	~Nit1() {
-		waitToComplete();
-	}
-protected:
-	void run();
-};
+int userMain(int argc, char* argv[]);
 
-void Nit1::run() {
-		for (int i = 0; i < 30; ++i) {
-			lock;
-			cout<<"u a() i = "<<i<<endl;
-			unlock;
-			for (int k = 0; k<10000; ++k)
-				for (int j = 0; j <30000; ++j);
-		}
-}
-
-class Nit2 : public Thread {
-public:
-	Nit2(StackSize stackSize, Time timeSlice):Thread(stackSize, timeSlice){}
-	
-protected:
-	void run();
-};
-
-void Nit2::run() {
-	for (int i = 0; i < 30; ++i) {
-		lock;
-		cout<<"u b() i = "<<i<<endl;
-		unlock;
-		for (int k = 0; k<10000; ++k)
-			for (int j = 0; j <30000; ++j);
-	}
-}
-void doSomething(){
-	Nit1 *t1 = new Nit1(1024, 1);
-	Nit2 *t2 = new Nit2(1024, 1);
-	t1->start();
-	t2->start();
-
-	for (int i = 0; i < 30; ++i) {
-		int k = lockCnt;
-		lock;
-		cout<<"main "<<i<<" "<<k<<endl;
-		unlock;
-
-		for (int j = 0; j< 30000; ++j)
-			for (int k = 0; k < 30000; ++k);
-	}
-
-	t1->waitToComplete();
-	t2->waitToComplete();
-
-	lock;
-	cout<<"Happy End"<<endl;
-	unlock;
-
-	delete t1;
-	delete t2;
-}
-
-int main(){
+int main(int argc, char* argv[]){
 	inicTimerInterrupt();
-	PCB::running = new PCB(0,10,nullptr);
+	PCB* userMainPCB = new PCB(0,10,nullptr);
+	PCB::running = userMainPCB;
 	PCB::quantCounter = 3;
-	doSomething();
+
+	int result = userMain(argc, argv);
 
 	restoreTimerInterrupt();
-	return 0;
+
+	cout << "FINISHING KERNEL!" << endl;
+	delete userMainPCB;
+	return result;
 }
 

@@ -20,9 +20,10 @@ public:
 	List& operator=(const List& list) { if (this != &list) { erase(); copy(list); } return *this; }
 	virtual ~List() { erase(); }
 
+	void erase();
+
 	int size() const { return n; }
 	bool empty() const { return n == 0; }
-	void erase();
 
 	void pushBack(T data);
 	void pushFront(T data);

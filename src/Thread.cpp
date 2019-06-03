@@ -9,9 +9,9 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 }
 
 Thread::~Thread() {
-	waitToComplete();
-	delete myPCB;
-	myPCB = nullptr;
+	//waitToComplete();
+	//delete myPCB;
+	//myPCB = nullptr;
 }
 
 void Thread::start() {
