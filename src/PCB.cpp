@@ -11,6 +11,7 @@ volatile PCB* PCB::running = nullptr;
 volatile Time PCB::quantCounter=2;
 volatile bool PCB::explicitDispatch=false;
 volatile List<PCB*> PCB::PCBList;
+int PCB::deletedPCBs=0;
 
 ID PCB::ID0 = 0;
 
@@ -95,6 +96,7 @@ void PCB::waitToComplete() {
 }
 
 PCB::~PCB() {
+	deletedPCBs++;
 	//lock;
 	//printf("Deleting PCB of %d\n",id);
 	//if (stack!=nullptr)

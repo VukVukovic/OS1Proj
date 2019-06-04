@@ -1,0 +1,5 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "C_Cpp.dimInactiveRegions": true,
+    "editor.showUnused": true
+}

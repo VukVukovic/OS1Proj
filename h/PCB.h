@@ -12,6 +12,7 @@ public:
 	volatile static Time quantCounter;
 	volatile static bool explicitDispatch;
 	volatile static List<PCB*> PCBList;
+	static int deletedPCBs;
 
 	unsigned *stack;
 	unsigned sp;

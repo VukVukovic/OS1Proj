@@ -10,13 +10,15 @@ int main(int argc, char* argv[]){
 	PCB* userMainPCB = new PCB(0,10,nullptr);
 	PCB::running = userMainPCB;
 	PCB::quantCounter = 3;
+	//stek za main nit ne smem da brisem!
 
 	int result = userMain(argc, argv);
 
 	restoreTimerInterrupt();
 
 	cout << "FINISHING KERNEL!" << endl;
-	delete userMainPCB;
+	//delete userMainPCB;
+	cout << PCB::deletedPCBs << endl;
 	return result;
 }
 

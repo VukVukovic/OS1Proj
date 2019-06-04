@@ -1,5 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
+#include <iostream.h>
+#include <assert.h>
+#include "Locker.h"
 
 template<class T>
 class List {
@@ -7,20 +10,27 @@ public:
 	struct Elem {
 		T data;
 		Elem *next, *prev;
-		Elem(T data) : data(data), prev(nullptr), next(nullptr) {}
+		Elem(T data) {
+			this->data = data;
+			prev = next = nullptr;
+		}
 	};
 
 	Elem *first, *last;
 	int n;
 
 	void copy(const List& list);
+	void erase();
 
-	List() : first(nullptr), last(nullptr), n(0) {}
+	List() {
+		first = nullptr;
+		last = nullptr;
+		n = 0;
+	}
 	List(const List& list) { copy(list); }
 	List& operator=(const List& list) { if (this != &list) { erase(); copy(list); } return *this; }
 	virtual ~List() { erase(); }
 
-	void erase();
 
 	int size() const { return n; }
 	bool empty() const { return n == 0; }
@@ -32,7 +42,11 @@ public:
 		List *list;
 		Elem *current, *deleted_next;
 	public:
-		Iterator(List *list, Elem *current) : list(list), current(current), deleted_next(nullptr) {}
+		Iterator(List *list, Elem *current) {
+			this->list = list;
+			this->current = current;
+			deleted_next = nullptr;
+		}
 		T operator*() const { return current->data; }
 		void operator++() { current = (current==nullptr)?deleted_next:current->next; deleted_next = nullptr; }
 		void operator++(int k) { ++(*this); }

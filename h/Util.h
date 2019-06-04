@@ -9,4 +9,9 @@ typedef int bool;
 #define false 0
 
 #define STACK_REG_OFFSET 12
+
+void* operator new(unsigned size);
+//void* operator new[](unsigned size);
+void operator delete(void *p);
+//void operator delete[](void *p);
 #endif
