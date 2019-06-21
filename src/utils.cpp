@@ -1,10 +1,22 @@
 #include "utils.h"
 #include <stdlib.h>
 
+// Needed for lock, unlock, try to remove
+#include "pcb.h"
+#include "Thread.h"
+
+volatile int lockCnt = 0;
+volatile bool changeWaiting = false;
+
 void* operator new(unsigned size) {
-    return malloc(size);
+    lock;
+    void* ret = malloc(size);
+    unlock;
+    return ret;
 }
 
 void operator delete(void *p) {
+    lock;
     free(p);
+    unlock;
 }
