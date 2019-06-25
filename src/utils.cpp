@@ -3,7 +3,6 @@
 
 // Needed for lock, unlock, try to remove
 #include "pcb.h"
-#include "Thread.h"
 
 volatile int lockCnt = 0;
 volatile bool changeWaiting = false;

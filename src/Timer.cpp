@@ -49,7 +49,10 @@ void interrupt timer(...){
             }
 
             PCB::running = Scheduler::get();
-            PCB::running->state = RUNNING;
+            if (PCB::running == nullptr) 
+                PCB::running = PCB::getIdlePCB();
+            else
+                PCB::running->state = RUNNING;
             
             PCB::quantCounter = PCB::running->timeSlice;
 

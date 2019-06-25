@@ -7,21 +7,22 @@ volatile PCB* PCB::running = nullptr;
 volatile Time PCB::quantCounter = 2;
 volatile bool PCB::timerCall = false;
 volatile bool PCB::changeWaiting = false;
+PCB* PCB::idlePCB = nullptr;
 
 ID PCB::ID0 = 0;
 
-PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread) {
+PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
 	this->myThread = myThread;
 
 	stack = new unsigned[stackSize/sizeof(unsigned)];
 	stack[stackSize-1] = 0x200; // PSWI=1
-	stack[stackSize-2] = FP_SEG(PCB::runner);
-	stack[stackSize-3] = FP_OFF(PCB::runner);
+	stack[stackSize-2] = FP_SEG(fun);
+	stack[stackSize-3] = FP_OFF(fun);
 
 	sp = FP_OFF(stack+stackSize-12);
 	ss = FP_SEG(stack+stackSize-12);
 	bp = sp;
-	state = READY;
+	state = s;
 
 	if (timeSlice == 0) timeSlice=-1; // Threads with unlimited timeSlice
 	this->timeSlice = timeSlice;
@@ -43,4 +44,13 @@ void PCB::runner() {
 	running->myThread->run();
 	running->state = FINISHED;
 	dispatch();
+}
+
+PCB* PCB::getIdlePCB() {
+	static PCB idlePCB(20,1,nullptr,PCB::idleMethod,IDLE);
+	return &idlePCB;
+}
+
+void PCB::idleMethod() {
+	while(true);
 }
