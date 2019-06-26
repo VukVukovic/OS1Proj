@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "SCHEDULE.H"
 #include <dos.h>
-#include <iostream.h>
+//#include <iostream.h>
 
 pInterrupt oldTimerRoutine;
 
@@ -32,7 +32,7 @@ void interrupt timer(...){
     if (PCB::timerCall || PCB::quantCounter == 0) {
         PCB::timerCall = false;
         if (!locked) {
-            PCB::changeWaiting=false;
+            changeWaiting=false;
             asm {
                 mov tsp, sp
                 mov tss, ss
@@ -66,7 +66,7 @@ void interrupt timer(...){
                 mov bp, tbp
             }
         } else
-            PCB::changeWaiting=true;
+            changeWaiting=true;
     }
 	
 }

@@ -3,8 +3,9 @@
 #include "timer.h"
 #include "Thread.h"
 #include "pcb.h"
+#include "list.h"
 
-int userMain (int argc, char* argv[]);
+int userMain(int argc, char* argv[]);
 
 class UserThread : public Thread {
 	int argc;
@@ -27,13 +28,17 @@ void UserThread::run() {
 int main(int argc, char* argv[]) {
     inicTimerInterrupt();
     PCB *kernelPCB = new PCB();
-	PCB::quantCounter = 1;
+	PCB::quantCounter = defaultTimeSlice;
     PCB::running = kernelPCB;
 
 	UserThread user(argc, argv);
 	user.start();
-	while (1);
+	user.waitToComplete();
 	int ret = user.returnCode();
+
+	lock;
+	cout << "Finished with code: " << ret << endl;
+	unlock;
 
     restoreTimerInterrupt();
     delete kernelPCB;

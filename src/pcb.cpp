@@ -4,9 +4,8 @@
 #include <dos.h>
 
 volatile PCB* PCB::running = nullptr;
-volatile Time PCB::quantCounter = 2;
+volatile Time PCB::quantCounter = 0;
 volatile bool PCB::timerCall = false;
-volatile bool PCB::changeWaiting = false;
 PCB* PCB::idlePCB = nullptr;
 
 ID PCB::ID0 = 0;
@@ -40,17 +39,45 @@ PCB::PCB() {
 	timeSlice=2;
 }
 
+PCB::~PCB() {
+	if (stack!=nullptr) {
+		delete[] stack;
+		stack = nullptr;
+	}
+}
+
 void PCB::runner() {
 	running->myThread->run();
 	running->state = FINISHED;
+	running->releaseWaiting();
 	dispatch();
 }
 
+void idleMethod() {
+	while(true);
+}
+
 PCB* PCB::getIdlePCB() {
-	static PCB idlePCB(20,1,nullptr,PCB::idleMethod,IDLE);
+	static PCB idlePCB(20,1,nullptr,idleMethod,IDLE);
 	return &idlePCB;
 }
 
-void PCB::idleMethod() {
-	while(true);
+void PCB::waitToComplete() {
+	lock;
+	if (state!=FINISHED) {
+		PCB::running->state = BLOCKED;
+		waiting.pushBack((PCB*)PCB::running);
+		dispatch();
+	}
+	unlock;
+}
+
+void PCB::releaseWaiting() {
+	lock;
+	for (List<PCB*>::Iterator it = waiting.begin(); it.exists(); ++it) {
+		PCB* releasePCB = *it;
+		releasePCB->state = READY;
+		Scheduler::put(releasePCB);
+	}
+	unlock;
 }

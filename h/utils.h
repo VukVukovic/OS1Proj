@@ -13,10 +13,11 @@ void operator delete(void *p);
 #define enableInterrupts asm popf
 
 extern volatile int lockCnt;
+extern volatile bool changeWaiting;
 void dispatch ();
 
 #define lock ++lockCnt
-#define unlock if (--lockCnt == 0 && PCB::changeWaiting) { dispatch(); }
+#define unlock if (--lockCnt == 0 && changeWaiting) { dispatch(); }
 #define locked (lockCnt>0)
 
 #endif

@@ -1,9 +1,6 @@
 #include "utils.h"
 #include <stdlib.h>
 
-// Needed for lock, unlock, try to remove
-#include "pcb.h"
-
 volatile int lockCnt = 0;
 volatile bool changeWaiting = false;
 

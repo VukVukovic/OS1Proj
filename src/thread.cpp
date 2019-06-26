@@ -8,7 +8,10 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 	myPCB = new PCB(stackSize, timeSlice, this);
 }
 
-Thread::~Thread() {}
+Thread::~Thread() {
+	delete myPCB;
+	myPCB = 0;
+}
 
 void Thread::start() {
 	lock;
@@ -17,9 +20,17 @@ void Thread::start() {
 	unlock;
 }
 
+void Thread::waitToComplete() {
+	if (myPCB==nullptr) return; // EXCEPTION!
+	myPCB->waitToComplete();
+}
+
 void dispatch() {
     disableInterrupts;
+	int lockSave = lockCnt;
+	lockCnt = 0;
 	PCB::timerCall = true;
 	timer();
+	lockCnt = lockSave;
 	enableInterrupts;
 }
