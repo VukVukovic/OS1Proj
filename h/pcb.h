@@ -12,6 +12,8 @@ public:
 	volatile static Time quantCounter;
 	volatile static bool timerCall;
 	
+	volatile static List<PCB*> PCBlist;
+
 	List<PCB*> waiting;
 
 	unsigned *stack;
@@ -31,10 +33,14 @@ public:
 	static PCB* getIdlePCB();
 
 	void waitToComplete();
+	
+	void start();
+
+	ID getId() { return id; }
+	static ID getRunningId();
+	static Thread* getThreadById(ID id);
 
 	~PCB();
-
-	
 private:
 	void releaseWaiting();
 	static ID ID0;

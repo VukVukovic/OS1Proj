@@ -6,7 +6,7 @@
 volatile PCB* PCB::running = nullptr;
 volatile Time PCB::quantCounter = defaultTimeSlice;
 volatile bool PCB::timerCall = false;
-
+volatile List<PCB*> PCB::PCBlist;
 ID PCB::ID0 = 0;
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
@@ -27,6 +27,7 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 
     lock;
 	id = ++ID0;
+	PCBlist.pushBack(this);
     unlock;
 }
 
@@ -47,6 +48,13 @@ PCB::~PCB() {
 		delete[] stack;
 		stack = nullptr;
 	}
+}
+
+void PCB::start() {
+	lock;
+	state = READY;
+	Scheduler::put(this);
+	unlock;
 }
 
 void PCB::runner() {
@@ -84,4 +92,21 @@ void PCB::releaseWaiting() {
 		it.remove();
 	}
 	unlock;
+}
+
+
+ID PCB::getRunningId() {
+	return PCB::running->id;
+}
+
+Thread* PCB::getThreadById(ID id) {
+	Thread *thr = nullptr;
+	lock;
+	for (List<PCB*>::Iterator it = PCBlist.begin(); it.exists(); ++it)
+		if ((*it)->getId() == id){
+			thr = (*it)->myThread;
+			break;
+		}
+	unlock;
+	return thr;
 }

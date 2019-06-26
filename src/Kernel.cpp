@@ -3,7 +3,6 @@
 #include "timer.h"
 #include "Thread.h"
 #include "pcb.h"
-#include "list.h"
 
 int userMain(int argc, char* argv[]);
 

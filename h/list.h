@@ -1,6 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
 #include "utils.h"
+#include <iostream.h>
 
 template<class T>
 class List {
@@ -20,6 +21,10 @@ public:
 	List() {
 		first = last = nullptr;
 		n = 0;
+
+		lock;
+		cout << "List()" << endl;
+		unlock;
 	}
 
 	int size() const { return n; }
@@ -33,7 +38,11 @@ public:
 
 	List(const List& list) { copy(list); }
 	List& operator=(const List& list) { if (this != &list) { erase(); copy(list); } return *this; }
-	virtual ~List() { erase(); }
+	virtual ~List() { 
+		lock;
+		cout << "~List()" << endl;
+		unlock;
+		erase(); }
 
  	class Iterator {
 		List *list;

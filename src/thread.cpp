@@ -14,14 +14,25 @@ Thread::~Thread() {
 }
 
 void Thread::start() {
-	lock;
-	myPCB->state = READY;
-	Scheduler::put(myPCB);
-	unlock;
+	if (myPCB==nullptr) return;
+	myPCB->start();
+}
+
+ID Thread::getId() {
+	if (myPCB==nullptr) return -1;
+	return myPCB->getId();
+}
+
+ID Thread::getRunningId() {
+	return PCB::getRunningId();
+}
+
+Thread* Thread::getThreadById(ID id) {
+	return PCB::getThreadById(id);
 }
 
 void Thread::waitToComplete() {
-	if (myPCB==nullptr) return; // EXCEPTION!
+	if (myPCB==nullptr) return;
 	myPCB->waitToComplete();
 }
 
