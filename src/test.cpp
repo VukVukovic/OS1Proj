@@ -4,6 +4,7 @@
 
 class Nit1 : public Thread {
 public:
+	int result;
 	Nit1():Thread(1024,1){}
 protected:
 	void run();
@@ -14,13 +15,16 @@ void Nit1::run() {
 			lock;
 			cout<<"u a() i = "<<i<<endl;
 			unlock;
-			//for (int k = 0; k<10000; ++k)
-			//	for (int j = 0; j <30000; ++j);
-		}
+			/*for (int k = 0; k<10000; ++k)
+				for (int j = 0; j <30000; ++j);*/
+			dispatch();
+		} 
+		result = 5;
 }
 
 class Nit2 : public Thread {
 public:
+	int result;
 	Nit2():Thread(1024,5){}
 protected:
 	void run();
@@ -31,9 +35,12 @@ void Nit2::run() {
 		lock;
 		cout<<"u b() i = "<<i<<endl;
 		unlock;
-		//for (int k = 0; k<10000; ++k)
-		//	for (int j = 0; j <30000; ++j);
+		/*for (int k = 0; k<10000; ++k)
+			for (int j = 0; j <30000; ++j); */
+		dispatch();
 	}
+
+	result = 6;
 }
 
 int userMain (int argc, char* argv[]) {
@@ -41,5 +48,5 @@ int userMain (int argc, char* argv[]) {
     Nit2 n2; n2.start();
 	n1.waitToComplete();
 	n2.waitToComplete();
-    return 0;
+    return n1.result + n2.result;
 }

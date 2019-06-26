@@ -10,7 +10,7 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 
 Thread::~Thread() {
 	delete myPCB;
-	myPCB = 0;
+	myPCB = nullptr;
 }
 
 void Thread::start() {

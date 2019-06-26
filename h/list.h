@@ -22,18 +22,18 @@ public:
 		n = 0;
 	}
 
+	int size() const { return n; }
+	bool empty() const { return (n == 0); }
+
+	void pushBack(T data);
+	void pushFront(T data);
+
 	void copy(const List& list);
 	void erase();
-
-	int size() const { return n; }
-	bool empty() const { return n == 0; }
 
 	List(const List& list) { copy(list); }
 	List& operator=(const List& list) { if (this != &list) { erase(); copy(list); } return *this; }
 	virtual ~List() { erase(); }
-
-	void pushBack(T data);
-	void pushFront(T data);
 
  	class Iterator {
 		List *list;
@@ -45,16 +45,17 @@ public:
 			deleted_next = nullptr;
 		}
 		T operator*() const { return current->data; }
-		void operator++() { current = (current==nullptr)?deleted_next:current->next; deleted_next = nullptr; }
+		void operator++() { current = ((current==nullptr)?deleted_next:current->next); deleted_next = nullptr; }
 		void operator++(int k) { ++(*this); }
 		bool exists() const { return current != nullptr; }
 		void remove() {
+			if (current == nullptr) return;
 			Elem *prev = current->prev;
 			Elem *next = current->next;
 			deleted_next = next;
 
-			(prev!=nullptr)?prev->next:list->first = next;
-			(next!=nullptr)?next->prev:list->last = prev;
+			((prev!=nullptr)?prev->next:list->first) = next;
+			((next!=nullptr)?next->prev:list->last) = prev;
 
 			delete current;
 			current = nullptr;
@@ -91,7 +92,7 @@ void List<T>::pushBack(T data)
 {
 	Elem *newelem = new Elem(data);
 	newelem->prev = last;
-	(empty())?first:last->next = newelem;
+	(empty()?first:last->next) = newelem;
 	last = newelem;
 	n++;
 }
@@ -101,7 +102,7 @@ void List<T>::pushFront(T data)
 {
 	Elem *newelem = new Elem(data);
 	newelem->next = first;
-	(empty())?last:first->prev = newelem;
+	(empty()?last:first->prev) = newelem;
 	first = newelem;
 	n++;
 }

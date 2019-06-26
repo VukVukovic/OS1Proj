@@ -26,11 +26,10 @@ void UserThread::run() {
 }
 
 int main(int argc, char* argv[]) {
-    inicTimerInterrupt();
-    PCB *kernelPCB = new PCB();
-	PCB::quantCounter = defaultTimeSlice;
-    PCB::running = kernelPCB;
+	PCB *kernelPCB = new PCB();
+    PCB::running = new PCB();
 
+	inicTimerInterrupt();   
 	UserThread user(argc, argv);
 	user.start();
 	user.waitToComplete();

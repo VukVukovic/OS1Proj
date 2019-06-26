@@ -4,9 +4,8 @@
 #include <dos.h>
 
 volatile PCB* PCB::running = nullptr;
-volatile Time PCB::quantCounter = 0;
+volatile Time PCB::quantCounter = defaultTimeSlice;
 volatile bool PCB::timerCall = false;
-PCB* PCB::idlePCB = nullptr;
 
 ID PCB::ID0 = 0;
 
@@ -36,7 +35,11 @@ PCB::PCB() {
     myThread = nullptr;
     sp = ss = bp = 0;
 	state = RUNNING;
-	timeSlice=2;
+	timeSlice=defaultTimeSlice;
+	
+	lock;
+	id = ++ID0;
+    unlock;
 }
 
 PCB::~PCB() {
@@ -78,6 +81,7 @@ void PCB::releaseWaiting() {
 		PCB* releasePCB = *it;
 		releasePCB->state = READY;
 		Scheduler::put(releasePCB);
+		it.remove();
 	}
 	unlock;
 }
