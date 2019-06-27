@@ -23,16 +23,16 @@ unsigned tss;
 unsigned tbp;
 
 void interrupt timer(...){
-    if (!PCB::timerCall)
+    if (!explicitCall)
         (*oldTimerRoutine)();
 
-	if (!PCB::timerCall && PCB::quantCounter>0)
-		PCB::quantCounter--;
+	if (!explicitCall && PCB::timeLeft>0)
+		PCB::timeLeft--;
 
-    if (PCB::timerCall || PCB::quantCounter == 0) {
-        PCB::timerCall = false;
+    if (explicitCall || PCB::timeLeft == 0) {
+        explicitCall = false;
         if (!locked) {
-            changeWaiting=false;
+            changeWaiting = false;
             asm {
                 mov tsp, sp
                 mov tss, ss
@@ -49,12 +49,13 @@ void interrupt timer(...){
             }
 
             PCB::running = Scheduler::get();
+
             if (PCB::running == nullptr) 
                 PCB::running = PCB::getIdlePCB();
             else
                 PCB::running->state = RUNNING;
             
-            PCB::quantCounter = PCB::running->timeSlice;
+            PCB::timeLeft = PCB::running->timeSlice;
 
             tsp = PCB::running->sp;
             tss = PCB::running->ss;

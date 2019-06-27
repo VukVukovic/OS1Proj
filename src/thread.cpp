@@ -11,6 +11,7 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 }
 
 Thread::~Thread() {
+	waitToComplete();
 	lock;
 	delete myPCB;
 	unlock;
@@ -44,7 +45,7 @@ void dispatch() {
     disableInterrupts;
 	int lockSave = lockCnt;
 	lockCnt = 0;
-	PCB::timerCall = true;
+	explicitCall = true;
 	timer();
 	lockCnt = lockSave;
 	enableInterrupts;

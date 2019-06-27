@@ -10,8 +10,8 @@ typedef int bool;
 #define enableInterrupts asm popf
 
 extern volatile int lockCnt;
-extern volatile bool changeWaiting;
-void dispatch ();
+extern volatile bool changeWaiting, explicitCall;
+void dispatch();
 
 #define lock ++lockCnt
 #define unlock if (--lockCnt == 0 && changeWaiting) { dispatch(); }

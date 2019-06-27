@@ -4,14 +4,11 @@
 #include <dos.h>
 
 volatile PCB* PCB::running = nullptr;
-volatile Time PCB::quantCounter = defaultTimeSlice;
-volatile bool PCB::timerCall = false;
+volatile Time PCB::timeLeft = defaultTimeSlice;
 volatile List<PCB*> PCB::PCBlist;
-ID PCB::ID0 = 0;
+volatile ID PCB::ID0 = 0;
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
-	this->myThread = myThread;
-
 	lock;
 	stack = new unsigned[stackSize/sizeof(unsigned)];
 	unlock;
@@ -23,30 +20,31 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 	ss = FP_SEG(stack+stackSize-12);
 	bp = sp;
 	state = s;
-
-	if (timeSlice == 0) timeSlice=-1; // Threads with unlimited timeSlice
-	this->timeSlice = timeSlice;
+	this->timeSlice = ((timeSlice==0)?-1:timeSlice);
+	this->myThread = myThread;
 
     lock;
+	id = ++ID0;
+	if (state!=IDLE)
+		PCBlist.pushBack(this);
+    unlock;
+}
+
+PCB::PCB() { // Kernel thread
+    stack = nullptr;
+    sp = ss = bp = 0;
+	state = RUNNING;
+	timeSlice = defaultTimeSlice;
+	myThread = nullptr;
+	
+	lock;
 	id = ++ID0;
 	PCBlist.pushBack(this);
     unlock;
 }
 
-PCB::PCB() {
-    stack = nullptr;
-    myThread = nullptr;
-    sp = ss = bp = 0;
-	state = RUNNING;
-	timeSlice=defaultTimeSlice;
-	
-	lock;
-	id = ++ID0;
-    unlock;
-}
-
 PCB::~PCB() {
-	if (stack!=nullptr) {
+	if (stack != nullptr) { // Kernel thread does not have allocated stack
 		lock;
 		delete[] stack;
 		unlock;
@@ -69,11 +67,12 @@ void PCB::runner() {
 }
 
 void idleMethod() {
+	cout << "Started idle!" << endl;
 	while(true);
 }
 
 PCB* PCB::getIdlePCB() {
-	static PCB idlePCB(20,1,nullptr,idleMethod,IDLE);
+	static PCB idlePCB(64,1,nullptr,idleMethod,IDLE);
 	return &idlePCB;
 }
 
@@ -90,14 +89,13 @@ void PCB::waitToComplete() {
 void PCB::releaseWaiting() {
 	lock;
 	for (List<PCB*>::Iterator it = waiting.begin(); it.exists(); ++it) {
-		PCB* releasePCB = *it;
+		PCB *releasePCB = *it;
 		releasePCB->state = READY;
 		Scheduler::put(releasePCB);
 		it.remove();
 	}
 	unlock;
 }
-
 
 ID PCB::getRunningId() {
 	return PCB::running->id;
