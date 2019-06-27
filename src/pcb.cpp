@@ -12,7 +12,9 @@ ID PCB::ID0 = 0;
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
 	this->myThread = myThread;
 
+	lock;
 	stack = new unsigned[stackSize/sizeof(unsigned)];
+	unlock;
 	stack[stackSize-1] = 0x200; // PSWI=1
 	stack[stackSize-2] = FP_SEG(fun);
 	stack[stackSize-3] = FP_OFF(fun);
@@ -45,7 +47,9 @@ PCB::PCB() {
 
 PCB::~PCB() {
 	if (stack!=nullptr) {
+		lock;
 		delete[] stack;
+		unlock;
 		stack = nullptr;
 	}
 }

@@ -6,9 +6,6 @@ typedef int bool;
 #define true 1
 #define false 0
 
-void* operator new(unsigned size);
-void operator delete(void *p);
-
 #define disableInterrupts asm { pushf; cli; }
 #define enableInterrupts asm popf
 

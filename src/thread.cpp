@@ -5,11 +5,15 @@
 #include "timer.h"
 
 Thread::Thread (StackSize stackSize, Time timeSlice) {
+	lock;
 	myPCB = new PCB(stackSize, timeSlice, this);
+	unlock;
 }
 
 Thread::~Thread() {
+	lock;
 	delete myPCB;
+	unlock;
 	myPCB = nullptr;
 }
 

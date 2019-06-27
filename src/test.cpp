@@ -15,9 +15,8 @@ void Nit1::run() {
 			lock;
 			cout<<"u a() i = "<<i<<endl;
 			unlock;
-			/*for (int k = 0; k<10000; ++k)
-				for (int j = 0; j <30000; ++j);*/
-			dispatch();
+			for (int k = 0; k<10000; ++k)
+				for (int j = 0; j <30000; ++j);
 		} 
 		result = 5;
 }
@@ -35,9 +34,8 @@ void Nit2::run() {
 		lock;
 		cout<<"u b() i = "<<i<<endl;
 		unlock;
-		/*for (int k = 0; k<10000; ++k)
-			for (int j = 0; j <30000; ++j); */
-		dispatch();
+		for (int k = 0; k<10000; ++k)
+			for (int j = 0; j <30000; ++j);
 	}
 
 	result = 6;

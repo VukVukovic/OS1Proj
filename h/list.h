@@ -21,10 +21,6 @@ public:
 	List() {
 		first = last = nullptr;
 		n = 0;
-
-		lock;
-		cout << "List()" << endl;
-		unlock;
 	}
 
 	int size() const { return n; }
@@ -38,11 +34,7 @@ public:
 
 	List(const List& list) { copy(list); }
 	List& operator=(const List& list) { if (this != &list) { erase(); copy(list); } return *this; }
-	virtual ~List() { 
-		lock;
-		cout << "~List()" << endl;
-		unlock;
-		erase(); }
+	virtual ~List() { erase(); }
 
  	class Iterator {
 		List *list;
@@ -66,7 +58,9 @@ public:
 			((prev!=nullptr)?prev->next:list->first) = next;
 			((next!=nullptr)?next->prev:list->last) = prev;
 
+			lock;
 			delete current;
+			unlock;
 			current = nullptr;
 			list->n--;
 		}
@@ -88,7 +82,9 @@ void List<T>::erase()
 	Elem *it = first;
 	while (it != nullptr) {
 		Elem *it_next = it->next;
+		lock;
 		delete it;
+		unlock;
 		it = it_next;
 	}
 
@@ -99,7 +95,9 @@ void List<T>::erase()
 template<class T>
 void List<T>::pushBack(T data)
 {
+	lock;
 	Elem *newelem = new Elem(data);
+	unlock;
 	newelem->prev = last;
 	(empty()?first:last->next) = newelem;
 	last = newelem;
@@ -109,7 +107,9 @@ void List<T>::pushBack(T data)
 template<class T>
 void List<T>::pushFront(T data)
 {
+	lock;
 	Elem *newelem = new Elem(data);
+	unlock;
 	newelem->next = first;
 	(empty()?last:first->prev) = newelem;
 	first = newelem;

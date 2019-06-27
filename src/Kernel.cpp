@@ -26,7 +26,7 @@ void UserThread::run() {
 
 int main(int argc, char* argv[]) {
 	PCB *kernelPCB = new PCB();
-    PCB::running = new PCB();
+    PCB::running = kernelPCB;
 
 	inicTimerInterrupt();   
 	UserThread user(argc, argv);
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	int ret = user.returnCode();
 
 	lock;
-	cout << "Finished with code: " << ret << endl;
+	cout << "User main finished with code: " << ret << endl;
 	unlock;
 
     restoreTimerInterrupt();
