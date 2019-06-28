@@ -43,10 +43,7 @@ void Thread::waitToComplete() {
 
 void dispatch() {
     disableInterrupts;
-	int lockSave = lockCnt;
-	lockCnt = 0;
 	explicitCall = true;
 	timer();
-	lockCnt = lockSave;
 	enableInterrupts;
 }

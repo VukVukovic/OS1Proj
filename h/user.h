@@ -5,7 +5,7 @@
 class UserThread : public Thread {
 	int argc;
 	char **argv;
-	int retCode;
+	volatile int retCode;
 public:
 	UserThread(int argc, char** argv) : Thread() {
 		this->argc = argc;

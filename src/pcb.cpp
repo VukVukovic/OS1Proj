@@ -19,6 +19,7 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 	sp = FP_OFF(stack+stackSize-12);
 	ss = FP_SEG(stack+stackSize-12);
 	bp = sp;
+	lockCount = 0;
 	state = s;
 	this->timeSlice = ((timeSlice==0)?-1:timeSlice);
 	this->myThread = myThread;
@@ -33,6 +34,7 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 PCB::PCB() { // Kernel thread
     stack = nullptr;
     sp = ss = bp = 0;
+	lockCount = 0;
 	state = RUNNING;
 	timeSlice = defaultTimeSlice;
 	myThread = nullptr;

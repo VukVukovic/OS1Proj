@@ -16,6 +16,7 @@ public:
 	unsigned sp;
 	unsigned ss;
 	unsigned bp;
+	int lockCount;
 	State state;
 	Time timeSlice;
 	Thread *myThread;
