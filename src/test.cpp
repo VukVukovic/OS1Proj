@@ -1,50 +1,64 @@
 #include "Thread.h"
 #include "utils.h"
 #include <iostream.h>
+#include "utils.h"
 
-class Nit1 : public Thread {
-public:
-	int result;
-	Nit1():Thread(1024,1){}
-protected:
-	void run();
-};
+int syncPrintf(const char *format, ...);
 
-void Nit1::run() {
-		for (int i = 0; i < 30; ++i) {
-			lock;
-			cout<<"u a() i = "<<i<<endl;
-			unlock;
-			for (int k = 0; k<10000; ++k)
-				for (int j = 0; j <30000; ++j);
-		} 
-		result = 5;
+/*
+ 	 Test: razlicita vremena izvrsavanja i velicine steka
+*/
+
+volatile Time ts;
+
+void tick()
+{
+	syncPrintf("timeSlice=%d\n",ts);
 }
 
-class Nit2 : public Thread {
+class TestThread : public Thread
+{
+private:
+	Time myTimeSlice;
 public:
-	int result;
-	Nit2():Thread(1024,5){}
-protected:
-	void run();
-};
 
-void Nit2::run() {
-	for (int i =0; i < 30; ++i) {
-		lock;
-		cout<<"u b() i = "<<i<<endl;
-		unlock;
-		for (int k = 0; k<10000; ++k)
-			for (int j = 0; j <30000; ++j);
+	TestThread(StackSize stackSize, Time timeSlice): Thread(stackSize,timeSlice), myTimeSlice(timeSlice) {};
+	~TestThread()
+	{
+		waitToComplete();
 	}
+protected:
 
-	result = 6;
+	void run();
+
+};
+
+void TestThread::run()
+{
+	for(unsigned i=0;i<3200;i++)
+	{
+		for(unsigned int j=0;j<3200;j++)
+		{
+			lock;
+			ts = myTimeSlice;
+			unlock;
+		}
+	}
 }
 
-int userMain (int argc, char* argv[]) {
-    Nit1 n1; n1.start();
-    Nit2 n2; n2.start();
-	n1.waitToComplete();
-	n2.waitToComplete();
-    return n1.result + n2.result;
+
+int userMain(int argc, char** argv)
+{
+	syncPrintf("Test starts.\n");
+	TestThread t1(64,1), t2(4096,32), t3(1024,16), t4(4096,0);
+	t1.start();
+	t2.start();
+	t3.start();
+	t4.start();
+	t1.waitToComplete();
+	t2.waitToComplete();
+	t3.waitToComplete();
+	t4.waitToComplete();
+	syncPrintf("Test ends.\n");
+	return 0;
 }

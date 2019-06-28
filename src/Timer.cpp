@@ -21,15 +21,20 @@ void restoreTimerInterrupt() {
 unsigned tsp;
 unsigned tss;
 unsigned tbp;
+volatile int timeLeft = defaultTimeSlice;
+
+void tick();
 
 void interrupt timer(...){
-    if (!explicitCall)
+    if (!explicitCall) {
         (*oldTimerRoutine)();
+        tick();
+    }
 
-	if (!explicitCall && PCB::timeLeft>0)
-		PCB::timeLeft--;
+	if (!explicitCall && timeLeft>0)
+		timeLeft--;
 
-    if (explicitCall || PCB::timeLeft == 0) {
+    if (explicitCall || timeLeft == 0) {
         explicitCall = false;
         if (!locked) {
             changeWaiting = false;
@@ -55,7 +60,7 @@ void interrupt timer(...){
             else
                 PCB::running->state = RUNNING;
             
-            PCB::timeLeft = PCB::running->timeSlice;
+            timeLeft = PCB::running->timeSlice;
 
             tsp = PCB::running->sp;
             tss = PCB::running->ss;

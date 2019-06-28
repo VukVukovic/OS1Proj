@@ -9,7 +9,6 @@ enum State{READY, RUNNING, BLOCKED, FINISHED, IDLE};
 class PCB {
 public:
 	volatile static PCB* running;
-	volatile static Time timeLeft;
 	volatile static List<PCB*> PCBlist;
 
 	List<PCB*> waiting;

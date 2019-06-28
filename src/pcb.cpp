@@ -4,13 +4,13 @@
 #include <dos.h>
 
 volatile PCB* PCB::running = nullptr;
-volatile Time PCB::timeLeft = defaultTimeSlice;
 volatile List<PCB*> PCB::PCBlist;
 volatile ID PCB::ID0 = 0;
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
+	stackSize /= sizeof(unsigned);
 	lock;
-	stack = new unsigned[stackSize/sizeof(unsigned)];
+	stack = new unsigned[stackSize];
 	unlock;
 	stack[stackSize-1] = 0x200; // PSWI=1
 	stack[stackSize-2] = FP_SEG(fun);
@@ -78,7 +78,7 @@ PCB* PCB::getIdlePCB() {
 
 void PCB::waitToComplete() {
 	lock;
-	if (state!=FINISHED) {
+	if (PCB::running != this && state != FINISHED && state != IDLE) {
 		PCB::running->state = BLOCKED;
 		waiting.pushBack((PCB*)PCB::running);
 		dispatch();
