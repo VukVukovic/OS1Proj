@@ -60,6 +60,8 @@ int KernelSem::signal(int n) {
 
 void KernelSem::removeBlocked(PCB *pcb) {
     List<PCB*>::Iterator it = blocked.findByValue(pcb);
-    if (it.exists())
+    if (it.exists()) {
         it.remove();
+        value++;
+    }
 }
