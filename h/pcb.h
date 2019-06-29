@@ -20,6 +20,8 @@ public:
 	State state;
 	Time timeSlice;
 	Thread *myThread;
+
+	bool unblockedTime;
 	
  	PCB();
 	PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)() = PCB::runner, State s = READY);
@@ -32,6 +34,9 @@ public:
 	ID getId() { return id; }
 	static ID getRunningId();
 	static Thread* getThreadById(ID id);
+
+	void unblock();
+	void block();
 
 	~PCB();
 private:

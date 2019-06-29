@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "SCHEDULE.H"
 #include <dos.h>
+#include "kersem.h"
 //#include <iostream.h>
 
 pInterrupt oldTimerRoutine;
@@ -28,6 +29,7 @@ void tick();
 void interrupt timer(...){
     if (!explicitCall) {
         (*oldTimerRoutine)();
+        KernelSem::blockedWaiting.incUnblock();
         tick();
     }
 

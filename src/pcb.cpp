@@ -23,6 +23,7 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 	state = s;
 	this->timeSlice = ((timeSlice==0)?-1:timeSlice);
 	this->myThread = myThread;
+	unblockedTime = false;
 
     lock;
 	id = ++ID0;
@@ -38,6 +39,7 @@ PCB::PCB() { // Kernel thread
 	state = RUNNING;
 	timeSlice = defaultTimeSlice;
 	myThread = nullptr;
+	unblockedTime = false;
 	
 	lock;
 	id = ++ID0;
@@ -113,4 +115,13 @@ Thread* PCB::getThreadById(ID id) {
 		}
 	unlock;
 	return thr;
+}
+
+void PCB::unblock() {
+	state = READY;
+	Scheduler::put(this);
+}
+
+void PCB::block() {
+	state = BLOCKED;
 }

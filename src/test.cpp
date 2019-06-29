@@ -1,28 +1,26 @@
 #include "Thread.h"
-#include "utils.h"
+#include "semaphor.h"
 #include <iostream.h>
-#include "utils.h"
+#include <stdlib.h>
 
 int syncPrintf(const char *format, ...);
 
 /*
- 	 Test: razlicita vremena izvrsavanja i velicine steka
+ 	 Test: Semafori sa spavanjem 3
 */
 
-volatile Time ts;
+int t=-1;
 
-void tick()
-{
-	syncPrintf("timeSlice=%d\n",ts);
-}
+Semaphore s(0);
 
 class TestThread : public Thread
 {
 private:
-	Time myTimeSlice;
+	Time waitTime;
+
 public:
 
-	TestThread(StackSize stackSize, Time timeSlice): Thread(stackSize,timeSlice), myTimeSlice(timeSlice) {};
+	TestThread(Time WT): Thread(), waitTime(WT){}
 	~TestThread()
 	{
 		waitToComplete();
@@ -35,30 +33,79 @@ protected:
 
 void TestThread::run()
 {
-	for(unsigned i=0;i<3200;i++)
-	{
-		for(unsigned int j=0;j<3200;j++)
-		{
-			lock;
-			ts = myTimeSlice;
-			unlock;
-		}
-	}
+	syncPrintf("Thread %d waits for %d units of time.\n",getId(),waitTime);
+	int r = s.wait(waitTime);
+	s.signal();
+	syncPrintf("Thread %d finished: r = %d\n", getId(),r);
+}
+
+void tick()
+{
+	/*
+	t++;
+	if(t)
+		syncPrintf("%d\n",t);
+		*/
 }
 
 
-int userMain(int argc, char** argv)
+#include <iostream.h>
+
+Semaphore* mutex = 0;
+
+class Znak : public Thread
 {
-	syncPrintf("Test starts.\n");
-	TestThread t1(64,1), t2(4096,32), t3(1024,16), t4(4096,0);
-	t1.start();
-	t2.start();
-	t3.start();
-	t4.start();
-	t1.waitToComplete();
-	t2.waitToComplete();
-	t3.waitToComplete();
-	t4.waitToComplete();
-	syncPrintf("Test ends.\n");
+public:
+	Znak(char znak, int n) : Thread(), znak(znak), n(n) {}
+	virtual ~Znak() { waitToComplete(); }
+
+	void run()
+	{
+		for (long i = 0; i < 100000; i++)
+		{
+			if (mutex->wait(n)) {
+				cout << znak;
+				mutex->signal();
+			}
+
+		}
+
+		if (mutex->wait(n)) {
+			cout << endl << znak << " finished" << endl;
+			mutex->signal();
+		}
+	}
+
+private:
+	char znak;
+	int n;
+
+};
+
+
+int userMain(int argc, char* argv[]) {
+	mutex = new Semaphore(1);
+
+	Znak* a = new Znak('a', 10);
+	Znak* b = new Znak('b', 15);
+	Znak* c = new Znak('c', 20);
+
+	a->start();
+	b->start();
+	c->start();
+
+	delete a;
+	delete b;
+	delete c;
+
+	if (mutex->wait(1)) {
+		cout << endl << "userMain finished" << endl;
+		mutex->signal();
+	}
+
+	delete mutex;
+
+
+
 	return 0;
 }

@@ -67,6 +67,14 @@ public:
 	};
 
 	Iterator begin() { return Iterator(this, first); }
+	Iterator findByValue(T value) {
+		Elem *current = first;
+		while (current != nullptr) {
+			if (current->data == value) break;
+			current = current->next;
+		}
+		return Iterator(this, current);
+	}
 };
 
 template<class T>
