@@ -8,22 +8,25 @@ volatile List<PCB*> PCB::PCBlist;
 volatile ID PCB::ID0 = 0;
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
-	stackSize /= sizeof(unsigned);
-	lock;
-	stack = new unsigned[stackSize];
-	unlock;
-	stack[stackSize-1] = 0x200; // PSWI=1
-	stack[stackSize-2] = FP_SEG(fun);
-	stack[stackSize-3] = FP_OFF(fun);
+	if (stackSize<minStackSize) stackSize = minStackSize;
+	if (stackSize>maxStackSize) stackSize = maxStackSize;
 
-	sp = FP_OFF(stack+stackSize-12);
-	ss = FP_SEG(stack+stackSize-12);
+	unsigned long stackCount = stackSize/sizeof(unsigned);
+	lock;
+	stack = new unsigned[stackCount];
+	unlock;
+	stack[stackCount-1] = 0x200; // PSWI=1
+	stack[stackCount-2] = FP_SEG(fun);
+	stack[stackCount-3] = FP_OFF(fun);
+
+	sp = FP_OFF(stack+stackCount-12);
+	ss = FP_SEG(stack+stackCount-12);
 	bp = sp;
 	lockCount = 0;
 	state = s;
 	this->timeSlice = ((timeSlice==0)?-1:timeSlice);
 	this->myThread = myThread;
-	unblockedTime = false;
+	unblTime = false;
 
     lock;
 	id = ++ID0;
@@ -39,7 +42,7 @@ PCB::PCB() { // Kernel thread
 	state = RUNNING;
 	timeSlice = defaultTimeSlice;
 	myThread = nullptr;
-	unblockedTime = false;
+	unblTime = false;
 	
 	lock;
 	id = ++ID0;
@@ -94,8 +97,7 @@ void PCB::releaseWaiting() {
 	lock;
 	for (List<PCB*>::Iterator it = waiting.begin(); it.exists(); ++it) {
 		PCB *releasePCB = *it;
-		releasePCB->state = READY;
-		Scheduler::put(releasePCB);
+		releasePCB->unblock();
 		it.remove();
 	}
 	unlock;
@@ -118,10 +120,14 @@ Thread* PCB::getThreadById(ID id) {
 }
 
 void PCB::unblock() {
+	lock;
 	state = READY;
 	Scheduler::put(this);
+	unlock;
 }
 
 void PCB::block() {
+	lock;
 	state = BLOCKED;
+	unlock;
 }

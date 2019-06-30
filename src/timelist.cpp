@@ -29,7 +29,7 @@ void TimeList::incUnblock() {
             first = first->next;
             
             pcb->unblock();
-            pcb->unblockedTime = true;
+            pcb->unblockedTime(true);
             kersem->removeBlocked(pcb);
             delete toRemove;
         }

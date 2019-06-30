@@ -4,6 +4,9 @@
 #include "Thread.h"
 #include "list.h"
 
+const StackSize minStackSize = 64;
+const StackSize maxStackSize = 65536;
+
 enum State{READY, RUNNING, BLOCKED, FINISHED, IDLE};
 
 class PCB {
@@ -18,10 +21,10 @@ public:
 	unsigned bp;
 	int lockCount;
 	State state;
-	Time timeSlice;
+	int timeSlice;
 	Thread *myThread;
 
-	bool unblockedTime;
+	bool unblTime;
 	
  	PCB();
 	PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)() = PCB::runner, State s = READY);
@@ -37,6 +40,9 @@ public:
 
 	void unblock();
 	void block();
+	
+	void unblockedTime(bool flag) { unblTime = flag; }
+	bool unblockedTime() { return unblTime; }
 
 	~PCB();
 private:

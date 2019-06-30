@@ -20,8 +20,8 @@ int KernelSem::wait(Time maxTimeToWait) {
         if (maxTimeToWait > 0)
             blockedWaiting.add(toBlock, maxTimeToWait, this);
         dispatch();
-        if (toBlock->unblockedTime) {
-            toBlock->unblockedTime = false;
+        if (toBlock->unblockedTime()) {
+            toBlock->unblockedTime(false);
             ret = 0;
         }
     }

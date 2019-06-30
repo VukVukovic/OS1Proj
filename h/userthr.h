@@ -5,7 +5,7 @@
 class UserThread : public Thread {
 	int argc;
 	char **argv;
-	volatile int retCode;	
+	int retCode;	
 
 public:
 	UserThread(int argc, char** argv) : Thread() {
@@ -14,7 +14,7 @@ public:
 		retCode = 8;
 	}
 
-	int returnCode() volatile { return retCode; }
+	int returnCode() { return retCode; }
 protected:
 	void run();
 };
