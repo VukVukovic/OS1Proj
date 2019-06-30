@@ -2,6 +2,7 @@
 #include "SCHEDULE.h"
 #include "utils.h"
 #include <dos.h>
+#include <iostream.h>
 
 volatile PCB* PCB::running = nullptr;
 volatile List<PCB*> PCB::PCBlist;
@@ -70,6 +71,11 @@ void PCB::runner() {
 	running->myThread->run();
 	running->state = FINISHED;
 	running->releaseWaiting();
+	lock;
+	cout << "Finished run" << PCB::getRunningId() << endl;
+	//cout << running->sp << " " << running->ss << endl;
+	//cout << running->spstart << " " << running->ssstart << endl << flush;
+	unlock;
 	dispatch();
 }
 

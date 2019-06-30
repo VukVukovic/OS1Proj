@@ -13,9 +13,7 @@ protected:
 };
 
 void TestThread::run() {
-	//for (int k=0;k<9000;k++)
-	//	for (int j=0;j<10000;j++);
-	syncPrintf("Finished %d\n", i);
+	syncPrintf("Finished %d\n", getId());
 }
 
 int userMain(int argc, char* argv[]) {
