@@ -73,11 +73,6 @@ void interrupt timer(...){
             mov ss, tss
             mov bp, tbp
         }
-
-       // lock;
-       // PCB *pcb = (PCB*)PCB::running;
-	   // cout << pcb->stack[pcb->stackCount-2] << " " << pcb->stack[pcb->stackCount-3] << endl;
-	   // unlock;
     } else if (timeLeft == 0 && locked)
         changeWaiting = true;
 }

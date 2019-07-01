@@ -4,30 +4,38 @@
 int syncPrintf(const char *format, ...);
 void tick() {}
 
-class TestThread : public Thread{
-public:
+class TestThread : public Thread {
 	int i;
-	TestThread(int i, StackSize sz, Time slice) : Thread(sz, slice), i(i) {}
+public:
+	TestThread(int i) : Thread(64, 0), i(i) {}
 protected:
 	void run();
 };
 
 void TestThread::run() {
-	syncPrintf("Finished %d\n", getId());
+	syncPrintf("%d start\n", i);
+	dispatch();
+	for (int j=0;j<9000;j++)
+		for (int k=0;k<9000;k++);
+	dispatch();
+	syncPrintf("%d end\n", i);
 }
 
 int userMain(int argc, char* argv[]) {
-	TestThread *threads[16];
-	for (int i=0;i<16;i++) {
-		threads[i] = new TestThread(i, 64*(i+1), i);
-		threads[i]->start();
+	const int n = 36;
+	Thread *thr[n];
+
+	syncPrintf("Started\n");
+
+	for (int i=0;i<n;i++) {
+		thr[i] = new TestThread(i);
+		thr[i]->start();
 	}
 
-	for (i=0;i<16;i++)
-		threads[i]->waitToComplete();
+	for (i=0;i<n;i++)
+		thr[i]->waitToComplete();
 
-	for (i=0;i<16;i++)
-		delete threads[i];
+	syncPrintf("Finished\n");
 
 	return 0;
 }

@@ -5,7 +5,7 @@
 #include <iostream.h>
 
 volatile PCB* PCB::running = nullptr;
-volatile List<PCB*> PCB::PCBlist;
+volatile PCBList PCB::allPCBs;
 volatile ID PCB::ID0 = 0;
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
@@ -32,7 +32,7 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
     lock;
 	id = ++ID0;
 	if (state!=IDLE)
-		PCBlist.pushBack(this);
+		allPCBs.pushBack(this);
     unlock;
 }
 
@@ -47,7 +47,7 @@ PCB::PCB() { // Kernel thread
 	
 	lock;
 	id = ++ID0;
-	PCBlist.pushBack(this);
+	allPCBs.pushBack(this);
     unlock;
 }
 
@@ -69,14 +69,11 @@ void PCB::start() {
 
 void PCB::runner() {
 	running->myThread->run();
-	running->state = FINISHED;
-	running->releaseWaiting();
 	lock;
-	cout << "Finished run" << PCB::getRunningId() << endl;
-	//cout << running->sp << " " << running->ss << endl;
-	//cout << running->spstart << " " << running->ssstart << endl << flush;
-	unlock;
+	running->releaseWaiting();
+	running->state = FINISHED;
 	dispatch();
+	unlock;
 }
 
 void idleMethod() {
@@ -93,7 +90,7 @@ void PCB::waitToComplete() {
 	lock;
 	if (PCB::running != this && state != FINISHED && state != IDLE) {
 		PCB::running->state = BLOCKED;
-		waiting.pushBack((PCB*)PCB::running);
+		waiting.pushFront((PCB*)PCB::running);
 		dispatch();
 	}
 	unlock;
@@ -101,10 +98,9 @@ void PCB::waitToComplete() {
 
 void PCB::releaseWaiting() {
 	lock;
-	for (List<PCB*>::Iterator it = waiting.begin(); it.exists(); ++it) {
-		PCB *releasePCB = *it;
+	while (!waiting.empty()) {
+		PCB *releasePCB = waiting.popFront();
 		releasePCB->unblock();
-		it.remove();
 	}
 	unlock;
 }
@@ -116,7 +112,7 @@ ID PCB::getRunningId() {
 Thread* PCB::getThreadById(ID id) {
 	Thread *thr = nullptr;
 	lock;
-	for (List<PCB*>::Iterator it = PCBlist.begin(); it.exists(); ++it)
+	for (PCBList::PCBIterator it = allPCBs.begin(); it.exists(); ++it)
 		if ((*it)->getId() == id){
 			thr = (*it)->myThread;
 			break;
