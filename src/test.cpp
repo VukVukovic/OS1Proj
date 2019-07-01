@@ -2,40 +2,59 @@
 #include <iostream.h>
 
 int syncPrintf(const char *format, ...);
-void tick() {}
 
-class TestThread : public Thread {
-	int i;
-public:
-	TestThread(int i) : Thread(64, 0), i(i) {}
-protected:
-	void run();
-};
+/*
+ 	 Test: razlicita vremena izvrsavanja i velicine steka
+*/
 
-void TestThread::run() {
-	syncPrintf("%d start\n", i);
-	dispatch();
-	for (int j=0;j<9000;j++)
-		for (int k=0;k<9000;k++);
-	dispatch();
-	syncPrintf("%d end\n", i);
+volatile Time ts;
+
+void tick()
+{
+	syncPrintf("timeSlice=%d\n",ts);
 }
 
-int userMain(int argc, char* argv[]) {
-	const int n = 36;
-	Thread *thr[n];
+class TestThread : public Thread
+{
+private:
+	Time myTimeSlice;
+public:
 
-	syncPrintf("Started\n");
-
-	for (int i=0;i<n;i++) {
-		thr[i] = new TestThread(i);
-		thr[i]->start();
+	TestThread(StackSize stackSize, Time timeSlice): Thread(stackSize,timeSlice), myTimeSlice(timeSlice) {};
+	~TestThread()
+	{
+		waitToComplete();
 	}
+protected:
 
-	for (i=0;i<n;i++)
-		thr[i]->waitToComplete();
+	void run();
 
-	syncPrintf("Finished\n");
+};
 
+void TestThread::run()
+{
+	for(unsigned i=0;i<32000;i++)
+	{
+		for(unsigned int j=0;j<32000;j++)
+		{
+			ts = myTimeSlice;
+		}
+	}
+}
+
+
+int userMain(int argc, char** argv)
+{
+	syncPrintf("Test starts.\n");
+	TestThread t1(64,1), t2(4096,32), t3(1024,16), t4(4096,0);
+	t1.start();
+	t2.start();
+	t3.start();
+	t4.start();
+	t1.waitToComplete();
+	t2.waitToComplete();
+	t3.waitToComplete();
+	t4.waitToComplete();
+	syncPrintf("Test ends.\n");
 	return 0;
 }
