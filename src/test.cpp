@@ -33,9 +33,9 @@ protected:
 
 void TestThread::run()
 {
-	for(unsigned i=0;i<32000;i++)
+	for(unsigned i=0;i<3200;i++)
 	{
-		for(unsigned int j=0;j<32000;j++)
+		for(unsigned int j=0;j<3200;j++)
 		{
 			ts = myTimeSlice;
 		}

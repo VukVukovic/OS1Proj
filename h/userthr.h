@@ -15,6 +15,7 @@ public:
 	}
 
 	int returnCode() { return retCode; }
+	~UserThread() { waitToComplete(); }
 protected:
 	void run();
 };
