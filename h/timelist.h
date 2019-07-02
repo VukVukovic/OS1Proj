@@ -11,22 +11,14 @@ class TimeList {
 		Time time;
         KernelSem *kersem;
 		Elem* next;
-		Elem(PCB *pcb, Time time, KernelSem *kersem) {
-			this->pcb = pcb;
-			this->time = time;
-			this->kersem = kersem;
-			this->next = nullptr;
-		}
+		Elem(PCB *pcb, Time time, KernelSem *kersem) : pcb(pcb), time(time), kersem(kersem), next(nullptr) {}
 	};
 
 	Time currentTime;
 	Elem *first;
 
 public:
-	TimeList() {
-		currentTime=0;
-		first=nullptr;
-	}
+	TimeList() : currentTime(0), first(nullptr) {}
 	void add(PCB *pcb, Time time, KernelSem *kersem);
 	void incUnblock();
 	void remove(PCB *pcb);

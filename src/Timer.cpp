@@ -28,7 +28,8 @@ void tick();
 void interrupt timer(...){
     if (!explicitCall) {
         (*oldTimerRoutine)();
-       // KernelSem::blockedWaiting.incUnblock();
+        if (!locked)
+        KernelSem::blockedWaiting.incUnblock();
         tick();
     }
 

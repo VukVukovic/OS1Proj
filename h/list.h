@@ -15,7 +15,9 @@ public:
 	int n;
 	Elem *first, *last;
 	List() : first(nullptr), last(nullptr), n(0) {}
+
 	bool empty() { return n==0; }
+	int size() { return n; }
 
 	void pushBack(T data) {
 		lock;
@@ -50,6 +52,7 @@ public:
 		return ret;
 	}
 
+/*
 	void printFwd() {
 		for (Elem *p = first; p!=nullptr; p=p->next)
 			cout << p->data << " ";
@@ -61,7 +64,7 @@ public:
 			cout << p->data << " ";
 		cout << endl;
 	}
-
+ */
 	virtual ~List() { 
 		while (first != nullptr) {
 			Elem *toDelete = first;

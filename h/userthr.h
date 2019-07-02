@@ -1,5 +1,5 @@
-#ifndef USER_H
-#define USER_H
+#ifndef USERTHR_H
+#define USERTHR_H
 #include "Thread.h"
 
 class UserThread : public Thread {

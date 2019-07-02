@@ -33,19 +33,17 @@ int KernelSem::signal(int n) {
     if (n<0) return n;
 
     int ret = 0;
-    /* 
     lock;
-    List<PCB*>::Iterator it = blocked.begin();
     if (n==0) {
-        if (++value <= 0) {
-            if (it.exists()) {
-                (*it)->unblock();
-                it.remove();
-            }
+        if (++value <= 0 && blocked.size()>0) {
+            PCB* toUnblock = blocked.popFront();
+            toUnblock->unblock();
+            blockedWaiting.remove(toUnblock);
         }
     } else {
         int unblocked = 0;
         value = value+n;
+        List<PCB*>::Iterator it = blocked.begin();
         while (it.exists() && n>0) {
             (*it)->unblock();
             blockedWaiting.remove(*it);
@@ -55,14 +53,15 @@ int KernelSem::signal(int n) {
         }
         ret = unblocked;
     } 
-    unlock;*/
+    unlock;
     return ret;
 }
 
 void KernelSem::removeBlocked(PCB *pcb) {
-    /*List<PCB*>::Iterator it = blocked.findByValue(pcb);
-    if (it.exists()) {
-        it.remove();
-        value++;
-    }*/
+    for (List<PCB*>::Iterator it = blocked.begin(); it.exists(); ++it) {
+        if (*it == pcb) { 
+            it.remove();
+            break; 
+        }
+    }
 }

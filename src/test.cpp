@@ -1,26 +1,27 @@
 #include "Thread.h"
 #include <iostream.h>
 
+#include "semaphor.h"
+#include <stdlib.h>
+
 int syncPrintf(const char *format, ...);
 
 /*
- 	 Test: razlicita vremena izvrsavanja i velicine steka
+ 	 Test: Semafori sa spavanjem 2
 */
 
-volatile Time ts;
+int t=-1;
 
-void tick()
-{
-	syncPrintf("timeSlice=%d\n",ts);
-}
+Semaphore s(0);
 
 class TestThread : public Thread
 {
 private:
-	Time myTimeSlice;
+	Time waitTime;
+
 public:
 
-	TestThread(StackSize stackSize, Time timeSlice): Thread(stackSize,timeSlice), myTimeSlice(timeSlice) {};
+	TestThread(Time WT): Thread(), waitTime(WT){}
 	~TestThread()
 	{
 		waitToComplete();
@@ -33,28 +34,29 @@ protected:
 
 void TestThread::run()
 {
-	for(unsigned i=0;i<3200;i++)
-	{
-		for(unsigned int j=0;j<3200;j++)
-		{
-			ts = myTimeSlice;
-		}
-	}
+	syncPrintf("Thread %d waits for %d units of time.\n",getId(),waitTime);
+	int r = s.wait(waitTime);
+	s.signal();
+	syncPrintf("Thread %d finished: r = %d\n", getId(),r);
 }
 
+void tick()
+{
+	t++;
+	if(t)
+		syncPrintf("%d\n",t);
+}
 
 int userMain(int argc, char** argv)
 {
 	syncPrintf("Test starts.\n");
-	TestThread t1(64,1), t2(4096,32), t3(1024,16), t4(4096,0);
+	TestThread t1(15),t2(10),t3(30);
 	t1.start();
 	t2.start();
 	t3.start();
-	t4.start();
-	t1.waitToComplete();
-	t2.waitToComplete();
-	t3.waitToComplete();
-	t4.waitToComplete();
+	s.wait(5);
+	s.wait(0);
+	s.signal();
 	syncPrintf("Test ends.\n");
 	return 0;
 }
