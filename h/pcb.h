@@ -3,7 +3,6 @@
 #include "utils.h"
 #include "Thread.h"
 #include "list.h"
-#include "pcblist.h"
 
 const StackSize minStackSize = 64;
 const StackSize maxStackSize = 65536;
@@ -13,9 +12,9 @@ enum State{READY, RUNNING, BLOCKED, FINISHED, IDLE};
 class PCB {
 public:
 	volatile static PCB* running;
-	volatile static PCBList allPCBs;
+	volatile static List<PCB*> allPCBs;
 
-	PCBList waiting;
+	List<PCB*> waiting;
 	unsigned *stack;
 	unsigned sp;
 	unsigned ss;

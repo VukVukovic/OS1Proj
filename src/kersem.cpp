@@ -33,6 +33,7 @@ int KernelSem::signal(int n) {
     if (n<0) return n;
 
     int ret = 0;
+    /* 
     lock;
     List<PCB*>::Iterator it = blocked.begin();
     if (n==0) {
@@ -54,14 +55,14 @@ int KernelSem::signal(int n) {
         }
         ret = unblocked;
     } 
-    unlock;
+    unlock;*/
     return ret;
 }
 
 void KernelSem::removeBlocked(PCB *pcb) {
-    List<PCB*>::Iterator it = blocked.findByValue(pcb);
+    /*List<PCB*>::Iterator it = blocked.findByValue(pcb);
     if (it.exists()) {
         it.remove();
         value++;
-    }
+    }*/
 }

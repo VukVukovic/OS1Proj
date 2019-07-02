@@ -5,7 +5,7 @@
 #include <iostream.h>
 
 volatile PCB* PCB::running = nullptr;
-volatile PCBList PCB::allPCBs;
+volatile List<PCB*> PCB::allPCBs;
 volatile ID PCB::ID0 = 0;
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
@@ -112,7 +112,7 @@ ID PCB::getRunningId() {
 Thread* PCB::getThreadById(ID id) {
 	Thread *thr = nullptr;
 	lock;
-	for (PCBList::PCBIterator it = allPCBs.begin(); it.exists(); ++it)
+	for (List<PCB*>::Iterator it = allPCBs.begin(); it.exists(); ++it)
 		if ((*it)->getId() == id){
 			thr = (*it)->myThread;
 			break;

@@ -5,6 +5,8 @@
 #include "pcb.h"
 #include "userthr.h"
 
+#include "list.h"
+
 int main(int argc, char* argv[]) {
 	PCB kernelPCB;
     PCB::running = &kernelPCB;
@@ -20,5 +22,7 @@ int main(int argc, char* argv[]) {
 	unlock;
 
     restoreTimerInterrupt();
+
+	cout << endl;
     return 0;
 }
