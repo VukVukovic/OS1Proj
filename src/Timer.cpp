@@ -4,6 +4,7 @@
 #include "SCHEDULE.H"
 #include <dos.h>
 #include "kersem.h"
+#include "intrtype.h"
 
 pInterrupt oldTimerRoutine;
 

@@ -7,21 +7,19 @@
 int syncPrintf(const char *format, ...);
 
 /*
- 	 Test: Semafori sa spavanjem 2
+ 	 Test: Semafori sa spavanjem
 */
 
+const int n = 3;
 int t=-1;
 
 Semaphore s(0);
 
 class TestThread : public Thread
 {
-private:
-	Time waitTime;
-
 public:
 
-	TestThread(Time WT): Thread(), waitTime(WT){}
+	TestThread(): Thread(){}
 	~TestThread()
 	{
 		waitToComplete();
@@ -34,10 +32,11 @@ protected:
 
 void TestThread::run()
 {
-	syncPrintf("Thread %d waits for %d units of time.\n",getId(),waitTime);
-	int r = s.wait(waitTime);
+	syncPrintf("Thread waits for 10 units of time...\n");
+	t=0;
+	s.wait(10);
+	syncPrintf("Thread finished.\n");
 	s.signal();
-	syncPrintf("Thread %d finished: r = %d\n", getId(),r);
 }
 
 void tick()
@@ -50,13 +49,16 @@ void tick()
 int userMain(int argc, char** argv)
 {
 	syncPrintf("Test starts.\n");
-	TestThread t1(15),t2(10),t3(30);
-	t1.start();
-	t2.start();
-	t3.start();
-	s.wait(5);
-	s.wait(0);
-	s.signal();
+	TestThread t[n];
+	int i;
+	for(i=0;i<n;i++)
+	{
+		t[i].start();
+	}
+	for(i=0;i<n;i++)
+	{
+		t[i].waitToComplete();
+	}
 	syncPrintf("Test ends.\n");
 	return 0;
 }

@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "pcb.h"
 #include "SCHEDULE.H"
+#include <iostream.h>
 
 volatile TimeList KernelSem::blockedWaiting;
 
