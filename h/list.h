@@ -85,6 +85,7 @@ public:
 
 		Iterator(List<T>* list, List<T>::Elem* current) : list(list), current(current), nextDeleted(nullptr) {}
 		Iterator(List<T>* list) : list(list), current(list->first), nextDeleted(nullptr) {}
+		Iterator() : list(nullptr), current(nullptr), nextDeleted(nullptr) {}
 		
 		bool exists() { return current!=nullptr; }
 		T operator*() { return current->data; }

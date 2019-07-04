@@ -7,21 +7,23 @@
 class KernelSem;
 
 class TimeList {
+public:
 	struct Elem {
 		PCB* pcb;
 		Time time;
-        KernelSem *kersem;
-		Elem(PCB *pcb, Time time, KernelSem *kersem) : pcb(pcb), time(time), kersem(kersem) {}
+		Elem(PCB *pcb, Time time) : pcb(pcb), time(time) {}
 	};
 
-
+private:
 	Time currentTime;
 	List<Elem> list;
 
 public:
 	TimeList() : currentTime(0) {}
-	void add(PCB *pcb, Time time, KernelSem *kersem);
-	void incUnblock();
-	void remove(PCB *pcb);
+	void add(PCB *pcb, Time time);
+	void tick();
+	bool finished();
+	bool empty();
+	PCB* popFront();
 };
 #endif

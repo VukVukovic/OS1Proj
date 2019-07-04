@@ -7,12 +7,16 @@
 class KernelSem {
     int value;
     List<PCB*> blocked;
+    TimeList blockedWaiting;
+    void tickCheck();
+
 public:
-    volatile static TimeList blockedWaiting;
+    static List<KernelSem*> semaphores;
     KernelSem(int init);
     int wait(Time maxTimeToWait);
     int signal(int n);
     int val() const { return value; }
-    void removeBlocked(PCB *pcb);
+    static void tick();
+    ~KernelSem();
 };
 #endif

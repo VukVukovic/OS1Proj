@@ -23,6 +23,6 @@ int main(int argc, char* argv[]) {
 
     restoreTimerInterrupt();
 
-	cout << endl; 
+	cout << "Restored timer" << endl;
     return 0;
 }

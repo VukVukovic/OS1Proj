@@ -5,7 +5,6 @@
 #include <dos.h>
 #include "kersem.h"
 #include "intrtype.h"
-#include <assert.h>
 
 pInterrupt oldTimerRoutine;
 
@@ -27,10 +26,10 @@ volatile int timeLeft = defaultTimeSlice;
 
 void tick();
 
-void interrupt timer(...){
+void interrupt timer(...){    
     if (!explicitCall) {
         (*oldTimerRoutine)();
-        KernelSem::blockedWaiting.incUnblock();
+        KernelSem::tick();
         tick();
     }
 
@@ -75,6 +74,7 @@ void interrupt timer(...){
             mov ss, tss
             mov bp, tbp
         }
+        
     } else if (timeLeft == 0 && locked)
         changeWaiting = true;
 }

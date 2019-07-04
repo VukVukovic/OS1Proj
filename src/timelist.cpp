@@ -2,42 +2,33 @@
 #include "kersem.h"
 #include "pcb.h"
 #include <iostream.h>
+#include <stdio.h>
 #include <assert.h>
+#include "SCHEDULE.H"
 
-void TimeList::add(PCB *pcb, Time time, KernelSem *kersem) {
+void TimeList::add(PCB *pcb, Time time) {
     lock;
 	time += currentTime;
     List<Elem>::Iterator it = list.begin();
     while (it.exists() && (*it).time <= time) ++it;
-    it.insertBefore(Elem(pcb, time, kersem));
+    it.insertBefore(Elem(pcb, time));
     unlock;
 }
 
-void TimeList::incUnblock() {
-    lock;
-	if (!list.empty()) {
-        currentTime++;
-        List<Elem>::Iterator it = list.begin();
-        while (it.exists() && (*it).time <= currentTime) {
-            cout << "UNBLOCKING!" << endl;
-            PCB *pcb = (*it).pcb;
-            KernelSem *kersem = (*it).kersem;
-
-            pcb->unblock();
-            pcb->unblockedTime(true);
-            kersem->removeBlocked(pcb);
-            it.remove();
-            ++it;
-        }
-    } else currentTime=0;
-    unlock;
+void TimeList::tick() {
+    if (!list.empty()) currentTime++;
+    else currentTime=0;
 }
 
-void TimeList::remove(PCB *pcb) {
-    lock;
-    List<Elem>::Iterator it = list.begin();
-    while (it.exists() && (*it).pcb != pcb) ++it;
-    if (it.exists())
-        it.remove();
-    unlock;
+bool TimeList::finished() {
+    if (list.empty()) return false;
+    return (*(list.begin())).time <= currentTime;
+}
+
+bool TimeList::empty() {
+    return list.empty();
+}
+
+PCB* TimeList::popFront() {
+    return (list.popFront()).pcb;
 }
