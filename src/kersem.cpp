@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "pcb.h"
 
-List<KernelSem*> KernelSem::semaphores;
+List<KernelSem*> KernelSem::semaphores{};
 
 KernelSem::KernelSem(int init) {
     if (init<0) init=0;
