@@ -3,6 +3,7 @@
 #include "pcb.h"
 #include "SCHEDULE.H"
 #include <iostream.h>
+#include <assert.h>
 
 volatile TimeList KernelSem::blockedWaiting;
 
@@ -20,6 +21,7 @@ int KernelSem::wait(Time maxTimeToWait) {
         blocked.pushBack(toBlock);
         if (maxTimeToWait > 0)
             blockedWaiting.add(toBlock, maxTimeToWait, this);
+        
         dispatch();
         if (toBlock->unblockedTime()) {
             toBlock->unblockedTime(false);
@@ -53,7 +55,7 @@ int KernelSem::signal(int n) {
             ++it;
         }
         ret = unblocked;
-    } 
+    }
     unlock;
     return ret;
 }

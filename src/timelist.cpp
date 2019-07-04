@@ -2,39 +2,32 @@
 #include "kersem.h"
 #include "pcb.h"
 #include <iostream.h>
+#include <assert.h>
 
 void TimeList::add(PCB *pcb, Time time, KernelSem *kersem) {
     lock;
 	time += currentTime;
-		
-	Elem *p = first, *prev = nullptr;
-	while (p != nullptr && p->time <= time) {
-		prev = p;
-		p = p->next;
-	}
-
-	Elem* newelem = new Elem(pcb, time, kersem);
-	((prev==nullptr)?first:prev->next) = newelem;
-	newelem->next = p;
+    List<Elem>::Iterator it = list.begin();
+    while (it.exists() && (*it).time <= time) ++it;
+    it.insertBefore(Elem(pcb, time, kersem));
     unlock;
 }
 
 void TimeList::incUnblock() {
     lock;
-	if (first != nullptr) {
+	if (!list.empty()) {
         currentTime++;
-        while (first != nullptr && first->time <= currentTime) {
-            PCB *pcb = first->pcb;
-            KernelSem *kersem = first->kersem;
-            Elem *toRemove = first;
-            first = first->next;
-            
-            //cout << "Unblocking "<< pcb->getId() << endl;
+        List<Elem>::Iterator it = list.begin();
+        while (it.exists() && (*it).time <= currentTime) {
+            cout << "UNBLOCKING!" << endl;
+            PCB *pcb = (*it).pcb;
+            KernelSem *kersem = (*it).kersem;
 
             pcb->unblock();
             pcb->unblockedTime(true);
             kersem->removeBlocked(pcb);
-            delete toRemove;
+            it.remove();
+            ++it;
         }
     } else currentTime=0;
     unlock;
@@ -42,27 +35,9 @@ void TimeList::incUnblock() {
 
 void TimeList::remove(PCB *pcb) {
     lock;
-	Elem *p = first, *prev = nullptr;
-	while (p != nullptr && p->pcb != pcb) {
-		prev = p;
-		p = p->next;
-	}
-
-	if (p != nullptr) {
-        Elem *toRemove = p;
-        if (prev == nullptr) first = first->next;
-        else prev->next = p->next;
-        delete toRemove;
-    }
-    unlock;
-}
-
-TimeList::~TimeList() {
-    lock;
-	while (first != nullptr) {
-		Elem *toRemove = first;
-		first = first->next;
-		delete toRemove;
-	}
+    List<Elem>::Iterator it = list.begin();
+    while (it.exists() && (*it).pcb != pcb) ++it;
+    if (it.exists())
+        it.remove();
     unlock;
 }

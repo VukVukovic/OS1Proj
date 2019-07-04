@@ -111,6 +111,17 @@ public:
 			unlock;
 			list->n--;
 		}
+		void insertBefore(T data) {
+			if (current==nullptr) list->pushBack(data);
+			else if (current->prev == nullptr) list->pushFront(data);
+			else {
+				List<T>::Elem *newelem = new List<T>::Elem(data);
+				newelem->next = current;
+				newelem->prev = current->prev;
+				current->prev->next = newelem;
+				current->prev = newelem;
+			}
+		}
 	};
 
 	Iterator begin() { return Iterator(this); }

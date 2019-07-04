@@ -2,6 +2,7 @@
 #define TIMELIST_H
 #include "Thread.h"
 #include "utils.h"
+#include "list.h"
 
 class KernelSem;
 
@@ -10,18 +11,17 @@ class TimeList {
 		PCB* pcb;
 		Time time;
         KernelSem *kersem;
-		Elem* next;
-		Elem(PCB *pcb, Time time, KernelSem *kersem) : pcb(pcb), time(time), kersem(kersem), next(nullptr) {}
+		Elem(PCB *pcb, Time time, KernelSem *kersem) : pcb(pcb), time(time), kersem(kersem) {}
 	};
 
+
 	Time currentTime;
-	Elem *first;
+	List<Elem> list;
 
 public:
-	TimeList() : currentTime(0), first(nullptr) {}
+	TimeList() : currentTime(0) {}
 	void add(PCB *pcb, Time time, KernelSem *kersem);
 	void incUnblock();
 	void remove(PCB *pcb);
-	~TimeList();
 };
 #endif
