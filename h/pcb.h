@@ -4,7 +4,7 @@
 #include "Thread.h"
 #include "list.h"
 
-const StackSize minStackSize = 128;
+const StackSize minStackSize = 256;
 const StackSize maxStackSize = 65536;
 
 enum State{CREATED, READY, RUNNING, BLOCKED, FINISHED, IDLE};

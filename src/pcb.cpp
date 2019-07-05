@@ -84,7 +84,7 @@ void idleMethod() {
 }
 
 PCB* PCB::getIdlePCB() {
-	static PCB idlePCB(128,1,nullptr,idleMethod,IDLE);
+	static PCB idlePCB(minStackSize,1,nullptr,idleMethod,IDLE);
 	return &idlePCB;
 }
 
