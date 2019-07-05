@@ -1,14 +1,14 @@
 #include "kersem.h"
 #include "utils.h"
 #include "pcb.h"
+#include <IOSTREAM.H>
 
-List<KernelSem*> KernelSem::semaphores{};
+List<KernelSem*> KernelSem::semaphores;
 
 KernelSem::KernelSem(int init) {
     if (init<0) init=0;
     value = init;
     lock;
-    cout << "Semaphore creation" << endl;
     semaphores.pushBack(this);
     unlock;
 }
@@ -19,6 +19,8 @@ int KernelSem::wait(Time maxTimeToWait) {
     if (--value < 0) {
         PCB *toBlock = (PCB*)PCB::running;
         toBlock->block();
+
+        cout << "Blocked "<< toBlock->getId() << endl;
 
         if (maxTimeToWait==0)
             blocked.pushBack(toBlock);
@@ -49,6 +51,7 @@ int KernelSem::signal(int n) {
         toUnblock->unblock();
         maxUnblock--;
         ret++;
+//        cout << "Unblocking "<< toUnblock->getId() << endl;
     }
 
     while (!blockedWaiting.empty() && maxUnblock>0) {
@@ -56,6 +59,7 @@ int KernelSem::signal(int n) {
         toUnblock->unblock();
         maxUnblock--;
         ret++;
+//      cout << "Unblocking "<< toUnblock->getId() << endl;
     }
     if (n==0) ret=0;
     unlock;
@@ -79,7 +83,8 @@ void KernelSem::tickCheck() {
     blockedWaiting.tick();
     while (blockedWaiting.finished()) {
         PCB* toUnblock = blockedWaiting.popFront();
-        toUnblock->unblock();
         toUnblock->unblockedTime(true);
+        toUnblock->unblock();
+        value++;
     }
 }

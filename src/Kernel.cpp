@@ -22,7 +22,5 @@ int main(int argc, char* argv[]) {
 	unlock;
 
     restoreTimerInterrupt();
-
-	cout << "Restored timer" << endl;
     return 0;
 }

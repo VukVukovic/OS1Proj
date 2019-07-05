@@ -62,8 +62,10 @@ PCB::~PCB() {
 
 void PCB::start() {
 	lock;
-	state = READY;
-	Scheduler::put(this);
+	if (state == CREATED) {
+		state = READY;
+		Scheduler::put(this);
+	}
 	unlock;
 }
 
@@ -88,7 +90,7 @@ PCB* PCB::getIdlePCB() {
 
 void PCB::waitToComplete() {
 	lock;
-	if (PCB::running != this && state != FINISHED && state != IDLE) {
+	if (PCB::running != this && state != FINISHED && state != CREATED && state != IDLE) {
 		PCB::running->state = BLOCKED;
 		waiting.pushFront((PCB*)PCB::running);
 		dispatch();

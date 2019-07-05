@@ -29,6 +29,10 @@ bool TimeList::empty() {
     return list.empty();
 }
 
+int TimeList::size() {
+    return list.size();
+}
+
 PCB* TimeList::popFront() {
     return (list.popFront()).pcb;
 }

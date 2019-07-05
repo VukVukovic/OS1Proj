@@ -113,14 +113,16 @@ public:
 			list->n--;
 		}
 		void insertBefore(T data) {
-			if (current==nullptr) list->pushBack(data);
-			else if (current->prev == nullptr) list->pushFront(data);
-			else {
+			if (list->size() == 0) list->pushFront(data); // empty list
+			else if (current == nullptr) list->pushBack(data); // end of list
+			else if (current->prev == nullptr) list->pushFront(data); // before first
+			else { //inside
 				List<T>::Elem *newelem = new List<T>::Elem(data);
 				newelem->next = current;
 				newelem->prev = current->prev;
 				current->prev->next = newelem;
 				current->prev = newelem;
+				list->n++;
 			}
 		}
 	};

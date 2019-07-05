@@ -25,5 +25,6 @@ public:
 	bool finished();
 	bool empty();
 	PCB* popFront();
+	int size();
 };
 #endif
