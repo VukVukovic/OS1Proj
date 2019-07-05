@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "kerevent.h"
 
-Event::Event (IVTNo ivtNo) {
+Event::Event(IVTNo ivtNo) {
     lock;
     myImpl = new KernelEv(ivtNo);
     unlock;

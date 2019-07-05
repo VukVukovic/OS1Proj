@@ -20,8 +20,6 @@ int KernelSem::wait(Time maxTimeToWait) {
         PCB *toBlock = (PCB*)PCB::running;
         toBlock->block();
 
-        cout << "Blocked "<< toBlock->getId() << endl;
-
         if (maxTimeToWait==0)
             blocked.pushBack(toBlock);
         else
@@ -51,7 +49,6 @@ int KernelSem::signal(int n) {
         toUnblock->unblock();
         maxUnblock--;
         ret++;
-//        cout << "Unblocking "<< toUnblock->getId() << endl;
     }
 
     while (!blockedWaiting.empty() && maxUnblock>0) {
@@ -59,7 +56,6 @@ int KernelSem::signal(int n) {
         toUnblock->unblock();
         maxUnblock--;
         ret++;
-//      cout << "Unblocking "<< toUnblock->getId() << endl;
     }
     if (n==0) ret=0;
     unlock;

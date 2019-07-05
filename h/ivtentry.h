@@ -30,6 +30,6 @@ public:
     void signal();
 
     void setEvent(KernelEv *event);
-    void restore();
+    void clearEvent();
 };
 #endif

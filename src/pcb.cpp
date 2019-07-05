@@ -79,7 +79,7 @@ void PCB::runner() {
 }
 
 void idleMethod() {
-	cout << "Started idle!" << endl;
+	//cout << "Started idle!" << endl;
 	while(true);
 }
 

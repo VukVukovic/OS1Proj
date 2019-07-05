@@ -1,5 +1,6 @@
 #include "ivtentry.h"
 #include "kerevent.h"
+#include "utils.h"
 #include <dos.h>
 
 IVTEntry* IVTEntry::ivtable[ENTRY_NUM] = {nullptr};
@@ -9,7 +10,7 @@ IVTEntry::IVTEntry(IVTNo num, pInterrupt newRoutine) : num(num), newRoutine(newR
 }
 
 IVTEntry::~IVTEntry() {
-    restore();
+    clearEvent();
 }
 
 void IVTEntry::setEvent(KernelEv *event) {
@@ -20,7 +21,7 @@ void IVTEntry::setEvent(KernelEv *event) {
     enableInterrupts;
 }
 
-void IVTEntry::restore() {
+void IVTEntry::clearEvent() {
     disableInterrupts;
     setvect(num, oldRoutine);
     enableInterrupts;

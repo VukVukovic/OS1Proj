@@ -6,9 +6,9 @@
 
 class Event {
 public:
-    Event (IVTNo ivtNo);
-    ~Event ();
-    void wait ();
+    Event(IVTNo ivtNo);
+    ~Event();
+    void wait();
 protected:
     friend class KernelEv;
     void signal(); // can call KernelEv

@@ -2,7 +2,8 @@
 #define KEREVENT_H
 #include "semaphor.h"
 #include "event.h"
-#include "pcb.h"
+
+class PCB;
 
 class KernelEv {
     IVTNo ivtNo;
@@ -11,7 +12,7 @@ class KernelEv {
 public:
     KernelEv(IVTNo ivtNo);
     ~KernelEv();
-    void wait() { if (pcb == PCB::running) sem.wait(0); }
-    void signal() { if (sem.val()<0) sem.signal(); }
+    void wait();
+    void signal();
 };
 #endif
