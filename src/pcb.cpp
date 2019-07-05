@@ -7,7 +7,6 @@
 volatile PCB* PCB::running = nullptr;
 volatile List<PCB*> PCB::allPCBs;
 volatile ID PCB::ID0 = 0;
-#define IMASEMOZESE 2048
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
 	if (stackSize<minStackSize) stackSize = minStackSize;
@@ -83,7 +82,7 @@ void idleMethod() {
 }
 
 PCB* PCB::getIdlePCB() {
-	static PCB idlePCB(IMASEMOZESE,1,nullptr,idleMethod,IDLE);
+	static PCB idlePCB(128,1,nullptr,idleMethod,IDLE);
 	return &idlePCB;
 }
 
