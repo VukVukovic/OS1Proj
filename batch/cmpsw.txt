@@ -1,1 +1,1 @@
--mh -y -v -w- -Ic:\bc31\include;C:\bc31\BIN\OS1Proj\lib;C:\bc31\BIN\OS1Proj\h -Lc:\bc31\lib;C:\bc31\BIN\OS1Proj\lib -nC:\bc31\BIN\OS1Proj\output -evs_test.exe
+-mh -y -v -Ic:\bc31\include;C:\bc31\BIN\OS1Proj\lib;C:\bc31\BIN\OS1Proj\h -Lc:\bc31\lib;C:\bc31\BIN\OS1Proj\lib -nC:\bc31\BIN\OS1Proj\output -evs_test.exe
