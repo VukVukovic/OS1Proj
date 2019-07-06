@@ -30,7 +30,7 @@ public:
 	SignalStatus localPermission;
 	volatile static SignalStatus globalPermission;
 	List<SignalHandler> handlers[16];
-	SignalStatus activeSignals;
+	List<SignalId> activeSignals;
 	PCB* parent;
 	
  	PCB();
@@ -62,6 +62,8 @@ public:
 	static void blockSignalGlobally(SignalId signal);
 	void unblockSignal(SignalId signal);
 	static void unblockSignalGlobally(SignalId signal);
+
+	void handleSignals();
 
 private:
 	void releaseWaiting();

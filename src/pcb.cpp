@@ -10,7 +10,7 @@ volatile ID PCB::ID0 = 0;
 volatile SignalStatus PCB::globalPermission(~0U);
 
 PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) 
-: activeSignals(PCB::running->activeSignals), localPermission(PCB::running->localPermission)
+: localPermission(PCB::running->localPermission)
 {
 	if (stackSize<minStackSize) stackSize = minStackSize;
 	if (stackSize>maxStackSize) stackSize = maxStackSize;
@@ -38,11 +38,12 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 	if (state!=IDLE) {
 		for (int i=0;i<16;i++) handlers[i] = parent->handlers[i];
 		allPCBs.pushBack(this);
-	}
+	} else
+		localPermission.clearAll();	// no signals for idle
     unlock;
 }
 
-PCB::PCB() : activeSignals(0), localPermission(~0U) { // Kernel thread
+PCB::PCB() : localPermission(~0U) { // Kernel thread
     stack = nullptr;
     sp = ss = bp = 0;
 	lockCount = 0;
@@ -146,8 +147,7 @@ void PCB::block() {
 void PCB::signal(SignalId signal) {
 	if (signal>=16) return;
 	lock;
-	if (globalPermission.status(signal) && localPermission.status(signal))
-		activeSignals.set(signal);
+	activeSignals.pushBack(signal);
 	unlock;
 }
 void PCB::registerHandler(SignalId signal, SignalHandler handler) {
@@ -175,7 +175,21 @@ void PCB::swap(SignalId id, SignalHandler hand1, SignalHandler hand2) {
 	unlock;
 }
 
-void PCB::blockSignal(SignalId signal) { localPermission.reset(signal); }
-void PCB::blockSignalGlobally(SignalId signal) { globalPermission.reset(signal); }
-void PCB::unblockSignal(SignalId signal) { localPermission.set(signal); }
-void PCB::unblockSignalGlobally(SignalId signal) { globalPermission.set(signal); }
+void PCB::blockSignal(SignalId signal) { lock; localPermission.reset(signal); unlock; }
+void PCB::blockSignalGlobally(SignalId signal) { lock; globalPermission.reset(signal); unlock; }
+void PCB::unblockSignal(SignalId signal) { lock; localPermission.set(signal); unlock; }
+void PCB::unblockSignalGlobally(SignalId signal) { lock; globalPermission.set(signal); unlock; }
+
+void PCB::handleSignals() {
+	for (List<SignalId>::Iterator it = activeSignals.begin(); it.exists(); ++it) {
+		SignalId id = *it;
+		if (localPermission.status(id) && globalPermission.status(id)) {
+			List<SignalHandler>::Iterator handit = handlers[id].begin();
+			while (handit.exists()) {
+				(*handit)();
+				++handit;
+			}
+			it.remove();
+		}
+	}
+}

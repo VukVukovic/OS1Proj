@@ -75,6 +75,7 @@ void interrupt timer(...){
             mov bp, tbp
         }
         
+        PCB::running->handleSignals();
     } else if (timeLeft == 0 && locked)
         changeWaiting = true;
 }
