@@ -81,6 +81,8 @@ void PCB::runner() {
 	running->myThread->run();
 	lock;
 	running->releaseWaiting();
+	if (running->parent!=nullptr) running->parent->signal(1);
+	running->signal(2); running->handleSignals(); // handle signal 2 and other if exist
 	running->state = FINISHED;
 	dispatch();
 	unlock;
