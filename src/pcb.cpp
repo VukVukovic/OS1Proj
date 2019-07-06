@@ -7,8 +7,11 @@
 volatile PCB* PCB::running = nullptr;
 volatile List<PCB*> PCB::allPCBs;
 volatile ID PCB::ID0 = 0;
+volatile SignalStatus PCB::globalPermission(~0U);
 
-PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) {
+PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), State s) 
+: activeSignals(PCB::running->activeSignals), localPermission(PCB::running->localPermission)
+{
 	if (stackSize<minStackSize) stackSize = minStackSize;
 	if (stackSize>maxStackSize) stackSize = maxStackSize;
 
@@ -29,14 +32,17 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 	this->myThread = myThread;
 	unblTime = false;
 
+	parent = (PCB*)PCB::running;
     lock;
 	id = ++ID0;
-	if (state!=IDLE)
+	if (state!=IDLE) {
+		for (int i=0;i<16;i++) handlers[i] = parent->handlers[i];
 		allPCBs.pushBack(this);
+	}
     unlock;
 }
 
-PCB::PCB() { // Kernel thread
+PCB::PCB() : activeSignals(0), localPermission(~0U) { // Kernel thread
     stack = nullptr;
     sp = ss = bp = 0;
 	lockCount = 0;
@@ -44,6 +50,7 @@ PCB::PCB() { // Kernel thread
 	timeSlice = defaultTimeSlice;
 	myThread = nullptr;
 	unblTime = false;
+	parent = nullptr;
 	
 	lock;
 	id = ++ID0;
@@ -135,3 +142,40 @@ void PCB::block() {
 	state = BLOCKED;
 	unlock;
 }
+
+void PCB::signal(SignalId signal) {
+	if (signal>=16) return;
+	lock;
+	if (globalPermission.status(signal) && localPermission.status(signal))
+		activeSignals.set(signal);
+	unlock;
+}
+void PCB::registerHandler(SignalId signal, SignalHandler handler) {
+	lock;
+	if (signal < 16)
+		handlers[signal].pushBack(handler);
+	unlock;
+}
+void PCB::unregisterAllHandlers(SignalId id) {
+	lock;
+	if (id < 16)
+		handlers[id].clear(); 
+	unlock;
+}
+void PCB::swap(SignalId id, SignalHandler hand1, SignalHandler hand2) {
+	if (id >= 16) return;
+	lock;
+	List<SignalHandler>::Iterator it1, it2;
+	for (List<SignalHandler>::Iterator it = handlers[id].begin(); it.exists(); ++it) {
+		if (!it1.exists() && (*it1) == hand1) it1 = it;
+		if (!it2.exists() && (*it2) == hand2) it2 = it;
+		if (it1.exists() && it2.exists()) break;
+	}
+	List<SignalHandler>::swap(it1, it2);
+	unlock;
+}
+
+void PCB::blockSignal(SignalId signal) { localPermission.reset(signal); }
+void PCB::blockSignalGlobally(SignalId signal) { globalPermission.reset(signal); }
+void PCB::unblockSignal(SignalId signal) { localPermission.set(signal); }
+void PCB::unblockSignalGlobally(SignalId signal) { globalPermission.set(signal); }

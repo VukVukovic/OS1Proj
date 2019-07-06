@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "Thread.h"
 #include "list.h"
+#include "sigstat.h"
 
 const StackSize minStackSize = 256;
 const StackSize maxStackSize = 65536;
@@ -25,6 +26,12 @@ public:
 	Thread *myThread;
 
 	bool unblTime;
+
+	SignalStatus localPermission;
+	volatile static SignalStatus globalPermission;
+	List<SignalHandler> handlers[16];
+	SignalStatus activeSignals;
+	PCB* parent;
 	
  	PCB();
 	PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)() = PCB::runner, State s = CREATED);
@@ -45,6 +52,17 @@ public:
 	bool unblockedTime() { return unblTime; }
 
 	~PCB();
+
+	void signal(SignalId signal);
+	void registerHandler(SignalId signal, SignalHandler handler);
+	void unregisterAllHandlers(SignalId id);
+	void swap(SignalId id, SignalHandler hand1, SignalHandler hand2);
+	
+	void blockSignal(SignalId signal);
+	static void blockSignalGlobally(SignalId signal);
+	void unblockSignal(SignalId signal);
+	static void unblockSignalGlobally(SignalId signal);
+
 private:
 	void releaseWaiting();
 	volatile static ID ID0;

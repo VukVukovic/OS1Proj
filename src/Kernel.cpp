@@ -4,9 +4,7 @@
 #include "Thread.h"
 #include "pcb.h"
 #include "userthr.h"
-
 #include "list.h"
-
 int main(int argc, char* argv[]) {
 	PCB kernelPCB;
     PCB::running = &kernelPCB;

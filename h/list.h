@@ -19,6 +19,32 @@ public:
 	bool empty() { return n==0; }
 	int size() { return n; }
 
+	void erase() {
+		while (first != nullptr) {
+			Elem *toDelete = first;
+			first = first->next;
+			lock;
+			delete toDelete;
+			unlock;
+		}
+
+		first = last = nullptr;
+		n = 0;
+	}
+
+	void copy(const List<T>& list) {
+		Elem *p = list.first;
+		while (p!=nullptr) {
+			pushBack(p->data);
+			p=p->next;
+		}
+	}
+
+	List(const List<T>& list) : first(nullptr), last(nullptr), n(0) { copy(list); }
+	List& operator=(const List<T>& list) { if (this!=&list) erase(); copy(list); }
+
+	void clear() { erase(); }
+
 	void pushBack(T data) {
 		lock;
 		Elem *newelem = new Elem(data);
@@ -65,18 +91,7 @@ public:
 		cout << endl;
 	}
  */
-	virtual ~List() { 
-		while (first != nullptr) {
-			Elem *toDelete = first;
-			first = first->next;
-			lock;
-			delete toDelete;
-			unlock;
-		}
-
-		first = last = nullptr;
-		n = 0;
-	}
+	virtual ~List() { erase(); }
 
 	class Iterator {
 		public: 
@@ -87,7 +102,7 @@ public:
 		Iterator(List<T>* list) : list(list), current(list->first), nextDeleted(nullptr) {}
 		Iterator() : list(nullptr), current(nullptr), nextDeleted(nullptr) {}
 		
-		bool exists() { return current!=nullptr; }
+		bool exists() { return list!=nullptr && current!=nullptr; }
 		T operator*() { return current->data; }
 		void operator++() { 
 			if (nextDeleted!=nullptr) current=nextDeleted;
@@ -128,5 +143,12 @@ public:
 	};
 
 	Iterator begin() { return Iterator(this); }
+	static void swap(Iterator it1, Iterator it2) {
+		if (it1.exists() && it2.exists()) {
+			T tmp = it1.current->data;
+			it1.current->data = it2.current->data;
+			it2.current->data = tmp;
+		}
+	}
 }
 #endif LIST_H
