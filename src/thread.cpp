@@ -13,7 +13,8 @@ Thread::Thread (StackSize stackSize, Time timeSlice) {
 Thread::~Thread() {
 	waitToComplete();
 	lock;
-	delete myPCB;
+	if (myPCB!=nullptr)
+		delete myPCB;
 	unlock;
 	myPCB = nullptr;
 }

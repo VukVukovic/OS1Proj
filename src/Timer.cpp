@@ -55,27 +55,27 @@ void interrupt timer(...){
             Scheduler::put((PCB*) PCB::running);
         }
 
-        PCB::running = Scheduler::get();
+        do {
+            PCB::running = Scheduler::get();
 
-        if (PCB::running == nullptr) 
-            PCB::running = PCB::getIdlePCB();
-        else
-            PCB::running->state = RUNNING;
-            
-        timeLeft = PCB::running->timeSlice;
+            if (PCB::running == nullptr)
+                PCB::running = PCB::getIdlePCB();
+            else
+                PCB::running->state = RUNNING;
+                
+            timeLeft = PCB::running->timeSlice;
 
-        tsp = PCB::running->sp;
-        tss = PCB::running->ss;
-        tbp = PCB::running->bp;
-        lockCnt = PCB::running->lockCount;
+            tsp = PCB::running->sp;
+            tss = PCB::running->ss;
+            tbp = PCB::running->bp;
+            lockCnt = PCB::running->lockCount;
 
-        asm {
-            mov sp, tsp
-            mov ss, tss
-            mov bp, tbp
-        }
-        
-        PCB::running->handleSignals();
+            asm {
+                mov sp, tsp
+                mov ss, tss
+                mov bp, tbp
+            }
+        } while (PCB::handleSignals());
     } else if (timeLeft == 0 && locked)
         changeWaiting = true;
 }

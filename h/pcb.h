@@ -31,7 +31,7 @@ public:
 	volatile static SignalStatus globalPermission;
 	List<SignalHandler> handlers[16];
 	List<SignalId> activeSignals;
-	PCB* parent;
+	ID parent;
 	
  	PCB();
 	PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)() = PCB::runner, State s = CREATED);
@@ -63,10 +63,11 @@ public:
 	void unblockSignal(SignalId signal);
 	static void unblockSignalGlobally(SignalId signal);
 
-	void handleSignals();
+	static bool handleSignals();
 
 private:
 	void releaseWaiting();
+	void killThread();
 	volatile static ID ID0;
 	ID id;
 	

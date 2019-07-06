@@ -6,17 +6,33 @@
 
 int syncPrintf(const char *format, ...);
 
-class Thread1 : public Thread {
-	int k;
+class Thread2 : public Thread {
 public:
-	Thread1(int k) : Thread(), k(k) {}
+	Thread2() : Thread() {}
+	~Thread2() { waitToComplete(); }
+protected:
+	void run();
+};
+
+void Thread2::run() {
+	syncPrintf("Thread 2!\n");
+	for (int i=0;i<100000;i++)
+		for (int j=0;j<10000;j++);
+	syncPrintf("Thread 2 finished!\n");
+}
+
+class Thread1 : public Thread {
+public:
+	Thread1() : Thread() {}
 	~Thread1() { waitToComplete(); }
 protected:
 	void run();
 };
 
 void Thread1::run() {
-	syncPrintf("Child thread executed!\n");
+	syncPrintf("Thread 1!\n");
+	Thread2 thr;
+	thr.start();
 }
 
 void finishHandler() {
@@ -26,8 +42,11 @@ void finishHandler() {
 void tick() {}
 
 int userMain(int argc, char* argv[]) {
-	Thread1 t1(1);
-	Thread::getThreadById(Thread::getRunningId())->registerHandler(2, finishHandler);
-	t1.start();
+	Thread2 t;
+	t.start();
+	Semaphore sleep(0);
+	sleep.wait(20);
+	syncPrintf("Taking too long, kill!\n");
+	t.signal(0);
 	return 0;
 }

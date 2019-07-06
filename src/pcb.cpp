@@ -32,11 +32,11 @@ PCB::PCB(StackSize stackSize, Time timeSlice, Thread *myThread, void (*fun)(), S
 	this->myThread = myThread;
 	unblTime = false;
 
-	parent = (PCB*)PCB::running;
+	parent = PCB::running->getId();
     lock;
 	id = ++ID0;
 	if (state!=IDLE) {
-		for (int i=0;i<16;i++) handlers[i] = parent->handlers[i];
+		for (int i=0;i<16;i++) handlers[i] = PCB::running->handlers[i];
 		allPCBs.pushBack(this);
 	} else
 		localPermission.clearAll();	// no signals for idle
@@ -51,7 +51,7 @@ PCB::PCB() : localPermission(~0U) { // Kernel thread
 	timeSlice = defaultTimeSlice;
 	myThread = nullptr;
 	unblTime = false;
-	parent = nullptr;
+	parent = 0;
 	
 	lock;
 	id = ++ID0;
@@ -60,12 +60,17 @@ PCB::PCB() : localPermission(~0U) { // Kernel thread
 }
 
 PCB::~PCB() {
+	lock;
 	if (stack != nullptr) { // Kernel thread does not have allocated stack
-		lock;
 		delete[] stack;
-		unlock;
 		stack = nullptr;
 	}
+	// Remove pcb from global pcb list
+	List<PCB*>::Iterator it = allPCBs.begin();
+	while (it.exists() && *it != this) ++it;
+	if (it.exists()) 
+		it.remove();
+	unlock;
 }
 
 void PCB::start() {
@@ -81,8 +86,14 @@ void PCB::runner() {
 	running->myThread->run();
 	lock;
 	running->releaseWaiting();
-	if (running->parent!=nullptr) running->parent->signal(1);
-	running->signal(2); running->handleSignals(); // handle signal 2 and other if exist
+
+	// System signals
+	Thread *parentThr = Thread::getThreadById(running->parent);
+	if (parentThr!=nullptr && parentThr->myPCB!=nullptr) parentThr->myPCB->signal(1);
+	running->signal(2); 
+	// handle signal 2 and other if left unhandled
+	running->handleSignals();
+
 	running->state = FINISHED;
 	dispatch();
 	unlock;
@@ -182,11 +193,19 @@ void PCB::blockSignalGlobally(SignalId signal) { lock; globalPermission.reset(si
 void PCB::unblockSignal(SignalId signal) { lock; localPermission.set(signal); unlock; }
 void PCB::unblockSignalGlobally(SignalId signal) { lock; globalPermission.set(signal); unlock; }
 
-void PCB::handleSignals() {
-	for (List<SignalId>::Iterator it = activeSignals.begin(); it.exists(); ++it) {
+bool PCB::handleSignals() {
+	PCB *pcb = (PCB*)running;
+	for (List<SignalId>::Iterator it = pcb->activeSignals.begin(); it.exists(); ++it) {
 		SignalId id = *it;
-		if (localPermission.status(id) && globalPermission.status(id)) {
-			List<SignalHandler>::Iterator handit = handlers[id].begin();
+		if (pcb->localPermission.status(id) && globalPermission.status(id)) {
+			if (id == 0) {
+				PCB::running->myThread->myPCB=nullptr;
+				PCB::running->releaseWaiting();
+				delete PCB::running;
+				PCB::running = nullptr;
+				return true;
+			}
+			List<SignalHandler>::Iterator handit = (pcb->handlers)[id].begin();
 			while (handit.exists()) {
 				(*handit)();
 				++handit;
@@ -194,4 +213,5 @@ void PCB::handleSignals() {
 			it.remove();
 		}
 	}
+	return false;
 }
