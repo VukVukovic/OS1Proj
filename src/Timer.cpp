@@ -75,6 +75,7 @@ void interrupt timer(...){
                 mov ss, tss
                 mov bp, tbp
             }
+            if (PCB::running->state==IDLE) break;
         } while (PCB::handleSignals());
     } else if (timeLeft == 0 && locked)
         changeWaiting = true;
