@@ -64,12 +64,11 @@ public:
 	static void unblockSignalGlobally(SignalId signal);
 
 	static bool handleSignals();
+	static void killThread(PCB *pcb);
 
 private:
 	void releaseWaiting();
-	void killThread();
 	volatile static ID ID0;
 	ID id;
-	
 };
 #endif

@@ -23,6 +23,7 @@ unsigned tsp;
 unsigned tss;
 unsigned tbp;
 volatile int timeLeft = defaultTimeSlice;
+PCB* toDelete;
 
 void tick();
 
@@ -55,6 +56,7 @@ void interrupt timer(...){
             Scheduler::put((PCB*) PCB::running);
         }
 
+        toDelete = nullptr;
         do {
             PCB::running = Scheduler::get();
 
@@ -75,8 +77,17 @@ void interrupt timer(...){
                 mov ss, tss
                 mov bp, tbp
             }
+
+            if (toDelete != nullptr) {
+                PCB::killThread(toDelete);
+                toDelete = nullptr;
+            }
+
             if (PCB::running->state==IDLE) break;
-        } while (PCB::handleSignals());
+            if (PCB::handleSignals())
+                toDelete = (PCB*)PCB::running;
+            // Delete thread's stack from other's contex
+        } while (toDelete!=nullptr);
     } else if (timeLeft == 0 && locked)
         changeWaiting = true;
 }

@@ -198,13 +198,8 @@ bool PCB::handleSignals() {
 	for (List<SignalId>::Iterator it = pcb->activeSignals.begin(); it.exists(); ++it) {
 		SignalId id = *it;
 		if (pcb->localPermission.status(id) && globalPermission.status(id)) {
-			if (id == 0) {
-				PCB::running->myThread->myPCB=nullptr;
-				PCB::running->releaseWaiting();
-				delete PCB::running;
-				PCB::running = nullptr;
-				return true;
-			}
+			if (id == 0) 
+				return true; // kill thread
 			List<SignalHandler>::Iterator handit = (pcb->handlers)[id].begin();
 			while (handit.exists()) {
 				(*handit)();
@@ -214,4 +209,10 @@ bool PCB::handleSignals() {
 		}
 	}
 	return false;
+}
+
+void PCB::killThread(PCB *toDelete) {
+	toDelete->myThread->myPCB=nullptr;
+	toDelete->releaseWaiting();
+	delete toDelete;
 }

@@ -15,10 +15,10 @@ protected:
 };
 
 void Thread2::run() {
-	syncPrintf("Thread 2!\n");
-	for (int i=0;i<100000;i++)
+	syncPrintf("Thread %d!\n", getId());
+	for (int i=0;i<10000;i++)
 		for (int j=0;j<10000;j++);
-	syncPrintf("Thread 2 finished!\n");
+	syncPrintf("Thread %d finished!\n", getId());
 }
 
 class Thread1 : public Thread {
@@ -42,11 +42,18 @@ void finishHandler() {
 void tick() {}
 
 int userMain(int argc, char* argv[]) {
-	Thread2 t;
-	t.start();
+	Thread2 thr[10];
+	for (int i=0;i<10;i++)
+		thr[i].start();
+
 	Semaphore sleep(0);
-	sleep.wait(20);
+	sleep.wait(5);
 	syncPrintf("Taking too long, kill!\n");
-	t.signal(0);
+	
+	thr[0].signal(0);
+	thr[1].signal(0);
+	thr[2].signal(0);
+	thr[3].signal(0);
+
 	return 0;
 }
