@@ -112,7 +112,7 @@ PCB* PCB::getIdlePCB() {
 void PCB::waitToComplete() {
 	lock;
 	if (PCB::running != this && state != FINISHED && state != CREATED && state != IDLE) {
-		PCB::running->state = BLOCKED;
+		PCB::running->block();
 		waiting.pushFront((PCB*)PCB::running);
 		dispatch();
 	}

@@ -11,7 +11,7 @@ public:
 	UserThread(int argc, char** argv) : Thread() {
 		this->argc = argc;
 		this->argv = argv;
-		retCode = 8;
+		retCode = 0;
 	}
 
 	int returnCode() { return retCode; }

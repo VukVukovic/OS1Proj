@@ -12,7 +12,7 @@ KernelEv::~KernelEv() {
 
 void KernelEv::wait() { 
     if (pcb == PCB::running) 
-        sem.wait(0); 
+        sem.wait(0);
 }
 
 void KernelEv::signal() {

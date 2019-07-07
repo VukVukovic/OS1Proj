@@ -9,8 +9,10 @@
 pInterrupt oldTimerRoutine;
 
 void inicTimerInterrupt() {
+    disableInterrupts;
 	oldTimerRoutine = getvect(8);
 	setvect(8, timer);
+    enableInterrupts;
 }
 
 void restoreTimerInterrupt() {
